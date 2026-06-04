@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "webapp",
+  "name": "care-fit-cycle",
   "compatibility_date": "2026-02-11",
   "pages_build_output_dir": "./dist",
   "compatibility_flags": [
@@ -10,32 +10,13 @@
     {
       "binding": "DB",
       "database_name": "care-fit-cycle-db",
+      // TODO: Cloudflare ダッシュボード → Workers & Pages → D1 で
+      //       "care-fit-cycle-db" を作成して database_id をここに入力してください
+      //       作成後: wrangler d1 migrations apply care-fit-cycle-db
+      //              wrangler d1 execute care-fit-cycle-db --file=./seed.sql
       "database_id": ""
     }
   ]
-  // "vars": {
-  //   "MY_VAR": "my-variable"
-  // },
-  // "kv_namespaces": [
-  //   {
-  //     "binding": "MY_KV_NAMESPACE",
-  //     "id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-  //   }
-  // ],
-  // "r2_buckets": [
-  //   {
-  //     "binding": "MY_BUCKET",
-  //     "bucket_name": "my-bucket"
-  //   }
-  // ],
-  // "d1_databases": [
-  //   {
-  //     "binding": "MY_DB",
-  //     "database_name": "my-database",
-  //     "database_id": ""
-  //   }
-  // ],
-  // "ai": {
-  //   "binding": "AI"
-  // }
+  // 環境変数は Cloudflare Pages ダッシュボード → Settings → Environment Variables で設定:
+  // - GEMINI_API_KEY: Gemini API キー (https://aistudio.google.com/apikey)
 }
