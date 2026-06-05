@@ -134,7 +134,7 @@ const App = () => {
   }
 
   const handleDemoReset = async () => {
-    if (!window.confirm('デモデータをリセットしますか？現在のデータは全て消えます。')) return
+    if (!window.confirm('デモ用データを作成しますか？現在のデータは全て消えます。')) return
     setResetting(true)
     try {
       await axios.post('/api/demo/reset')
@@ -294,11 +294,7 @@ const App = () => {
         <div className="flex items-center gap-3">
           <div className="relative">
             <div className="w-12 h-12 rounded-full bg-orange-100 border-2 border-white shadow-md flex items-center justify-center overflow-hidden">
-              <img
-                src="/static/okada-profile.jpg"
-                alt={resident.name}
-                className="w-full h-full object-cover"
-              />
+              <img src="/static/okada-profile.jpg" alt={resident.name} className="w-full h-full object-cover" />
             </div>
             <div className="absolute -bottom-0.5 -right-0.5 bg-red-400 text-white p-1 rounded-full shadow-lg">
               <i className="fas fa-heart text-[8px]"></i>
@@ -317,22 +313,13 @@ const App = () => {
       {/* モバイル用タブナビゲーション */}
       <div className="lg:hidden bg-white border-b border-slate-200 shrink-0">
         <div className="flex">
-          <button
-            onClick={() => setMobileTab('care-plan')}
-            className={'flex-1 py-3 text-sm font-medium border-b-2 transition-colors ' + (mobileTab === 'care-plan' ? 'border-[#01C1AF] text-[#01C1AF]' : 'border-transparent text-slate-400')}
-          >
+          <button onClick={() => setMobileTab('care-plan')} className={'flex-1 py-3 text-sm font-medium border-b-2 transition-colors ' + (mobileTab === 'care-plan' ? 'border-[#01C1AF] text-[#01C1AF]' : 'border-transparent text-slate-400')}>
             <i className="fas fa-clock mr-1"></i> プラン
           </button>
-          <button
-            onClick={() => setMobileTab('case-record')}
-            className={'flex-1 py-4 text-base font-black border-b-4 transition-colors ' + (mobileTab === 'case-record' ? 'border-[#01C1AF] text-[#01C1AF] bg-[#01C1AF]/5' : 'border-transparent text-slate-400')}
-          >
+          <button onClick={() => setMobileTab('case-record')} className={'flex-1 py-4 text-base font-black border-b-4 transition-colors ' + (mobileTab === 'case-record' ? 'border-[#01C1AF] text-[#01C1AF] bg-[#01C1AF]/5' : 'border-transparent text-slate-400')}>
             <i className="fas fa-clipboard-list mr-1"></i> 記録
           </button>
-          <button
-            onClick={() => setMobileTab('insights')}
-            className={'flex-1 py-3 text-sm font-medium border-b-2 transition-colors ' + (mobileTab === 'insights' ? 'border-[#01C1AF] text-[#01C1AF]' : 'border-transparent text-slate-400')}
-          >
+          <button onClick={() => setMobileTab('insights')} className={'flex-1 py-3 text-sm font-medium border-b-2 transition-colors ' + (mobileTab === 'insights' ? 'border-[#01C1AF] text-[#01C1AF]' : 'border-transparent text-slate-400')}>
             <i className="fas fa-lightbulb mr-1"></i> 気づき
           </button>
         </div>
@@ -341,20 +328,13 @@ const App = () => {
       {/* 左カラム：24時間シート */}
       <div
         className={'flex flex-col z-30 bg-white lg:shadow-xl lg:rounded-r-[40px] lg:border-r border-orange-50 ' + (mobileTab === 'care-plan' ? 'flex-1 overflow-y-auto lg:overflow-hidden lg:w-[22%]' : 'hidden lg:flex lg:w-[22%]')}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
+        onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}
       >
-        {/* PC用ヘッダー */}
         <div className="hidden lg:block p-8 pt-10 pb-6 shrink-0">
           <div className="flex items-center gap-5 mb-6">
             <div className="relative">
               <div className="w-20 h-20 rounded-full bg-orange-100 border-4 border-white shadow-md flex items-center justify-center overflow-hidden">
-                <img
-                  src="/static/okada-profile.jpg"
-                  alt={resident.name}
-                  className="w-full h-full object-cover"
-                />
+                <img src="/static/okada-profile.jpg" alt={resident.name} className="w-full h-full object-cover" />
               </div>
               <div className="absolute -bottom-1 -right-1 bg-red-400 text-white p-1.5 rounded-full shadow-lg">
                 <i className="fas fa-heart text-xs"></i>
@@ -368,7 +348,6 @@ const App = () => {
               <p className="text-sm text-slate-400 mt-1 font-medium">「{resident.favorite_things}」</p>
             </div>
           </div>
-
           <div className="bg-orange-50/50 rounded-2xl p-4 border border-orange-100/50 mb-4">
             <div className="flex items-center gap-2 text-orange-600 mb-1">
               <i className="fas fa-sun text-sm"></i>
@@ -376,50 +355,28 @@ const App = () => {
             </div>
             <p className="text-xs font-bold text-slate-600">「{resident.today_wish}」</p>
           </div>
-
           <div className="flex gap-2">
-            <a
-              href={`/api/residents/${residentId}/care-plans/export?format=html`}
-              target="_blank"
-              rel="noreferrer"
-              className="flex-1 bg-gradient-to-r from-teal-500 to-[#01C1AF] hover:from-teal-600 hover:to-[#00A89D] text-white text-[10px] font-bold py-2 px-3 rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-1"
-            >
-              <i className="fas fa-print"></i>
-              印刷
+            <a href={`/api/residents/${residentId}/care-plans/export?format=html`} target="_blank" rel="noreferrer" className="flex-1 bg-gradient-to-r from-teal-500 to-[#01C1AF] hover:from-teal-600 hover:to-[#00A89D] text-white text-[10px] font-bold py-2 px-3 rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-1">
+              <i className="fas fa-print"></i>印刷
             </a>
-            <a
-              href={`/api/residents/${residentId}/care-plans/export?format=csv`}
-              download
-              className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold py-2 px-3 rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1"
-            >
-              <i className="fas fa-file-csv"></i>
-              CSV
+            <a href={`/api/residents/${residentId}/care-plans/export?format=csv`} download className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold py-2 px-3 rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1">
+              <i className="fas fa-file-csv"></i>CSV
             </a>
           </div>
         </div>
-
         <div className="px-4 lg:px-6 py-2">
           <h3 className="text-xs font-black text-slate-300 uppercase tracking-widest flex items-center gap-2 mb-4">
             <i className="fas fa-clock text-sm"></i> 24時間の暮らしプラン
           </h3>
         </div>
-
         <div className="flex-1 overflow-y-auto px-4 lg:px-6 pb-8 space-y-4 lg:space-y-6 relative">
           <div className="absolute left-8 lg:left-11 top-0 bottom-0 w-px bg-slate-100 -z-0"></div>
-
           {carePlans.map((item) => {
             const notesForThisTime = stickyNotesByTime[item.time] || []
             return (
               <div key={item.id} className="relative z-10">
                 <div className="flex items-start gap-4 lg:gap-6">
-                  <div
-                    className="bg-white border-2 rounded-2xl p-1 text-[10px] font-bold w-10 h-10 flex items-center justify-center shrink-0 shadow-sm transition-all"
-                    style={{
-                      borderColor: item.status === 'fit' ? primaryColor : '#E2E8F0',
-                      color: item.status === 'fit' ? primaryColor : '#94A3B8',
-                      transform: item.status === 'fit' ? 'scale(1.1)' : 'scale(1)',
-                    }}
-                  >
+                  <div className="bg-white border-2 rounded-2xl p-1 text-[10px] font-bold w-10 h-10 flex items-center justify-center shrink-0 shadow-sm transition-all" style={{ borderColor: item.status === 'fit' ? primaryColor : '#E2E8F0', color: item.status === 'fit' ? primaryColor : '#94A3B8', transform: item.status === 'fit' ? 'scale(1.1)' : 'scale(1)' }}>
                     {item.time}
                   </div>
                   <div className={'flex-1 p-3 lg:p-4 rounded-3xl border transition-all relative ' + (item.status === 'fit' ? 'border-teal-50 bg-teal-50/20 shadow-sm' : 'border-slate-100 bg-white')}>
@@ -428,36 +385,23 @@ const App = () => {
                       {item.status === 'fit' && <div className="bg-teal-500 text-white p-1 rounded-full"><i className="fas fa-check text-[8px]"></i></div>}
                     </div>
                     <p className="text-[11px] text-slate-500 mt-1.5 leading-relaxed font-medium">{item.details}</p>
-
                     {notesForThisTime.map(note => (
-                      <div
-                        key={note.id}
-                        className={'mt-4 p-4 rounded-2xl shadow-lg border-2 transform hover:scale-[1.02] transition-all cursor-pointer relative ' + (note.note_type === 'ai' ? 'bg-gradient-to-br from-cyan-50 to-white border-cyan-300' : 'bg-gradient-to-br from-amber-50 to-white border-amber-300')}
-                      >
+                      <div key={note.id} className={'mt-4 p-4 rounded-2xl shadow-lg border-2 transform hover:scale-[1.02] transition-all cursor-pointer relative ' + (note.note_type === 'ai' ? 'bg-gradient-to-br from-cyan-50 to-white border-cyan-300' : 'bg-gradient-to-br from-amber-50 to-white border-amber-300')}>
                         <div className={'absolute -top-2 -right-2 w-8 h-8 rounded-full shadow-md ' + (note.note_type === 'ai' ? 'bg-cyan-400' : 'bg-amber-400')}></div>
                         <div className="flex items-center gap-2 mb-2">
                           <div className={'px-2 py-1 rounded-full text-[9px] font-black uppercase ' + (note.note_type === 'ai' ? 'bg-cyan-100 text-cyan-700' : 'bg-amber-100 text-amber-700')}>
-                            <i className={(note.note_type === 'ai' ? 'fas fa-brain' : 'fas fa-user') + ' mr-1'}></i>
-                            {note.source}
+                            <i className={(note.note_type === 'ai' ? 'fas fa-brain' : 'fas fa-user') + ' mr-1'}></i>{note.source}
                           </div>
                           <span className="text-[9px] font-bold text-slate-400">{note.fit_category === 'time' ? '時間のフィット' : note.fit_category === 'preference' ? '好みのフィット' : 'コツのフィット'}</span>
                         </div>
                         <p className="font-black text-sm text-slate-800 mb-2">{note.title}</p>
                         <p className="text-xs leading-relaxed font-medium text-slate-600 mb-3">{note.content}</p>
                         <div className="flex gap-2">
-                          <button
-                            onClick={() => handleStickyNoteAction(note.id, 'adopted')}
-                            className="flex-1 bg-gradient-to-r from-teal-500 to-[#01C1AF] hover:from-teal-600 hover:to-[#00A89D] text-white text-xs font-black py-2 px-3 rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-1"
-                          >
-                            <i className="fas fa-check-circle"></i>
-                            とりいれる
+                          <button onClick={() => handleStickyNoteAction(note.id, 'adopted')} className="flex-1 bg-gradient-to-r from-teal-500 to-[#01C1AF] hover:from-teal-600 hover:to-[#00A89D] text-white text-xs font-black py-2 px-3 rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-1">
+                            <i className="fas fa-check-circle"></i>とりいれる
                           </button>
-                          <button
-                            onClick={() => handleStickyNoteAction(note.id, 'rejected')}
-                            className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold py-2 px-3 rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1"
-                          >
-                            <i className="fas fa-times-circle"></i>
-                            まだそのまま
+                          <button onClick={() => handleStickyNoteAction(note.id, 'rejected')} className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold py-2 px-3 rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1">
+                            <i className="fas fa-times-circle"></i>まだそのまま
                           </button>
                         </div>
                       </div>
@@ -473,45 +417,26 @@ const App = () => {
       {/* 中央カラム：ケース記録 */}
       <div
         className={'flex flex-col bg-gradient-to-b from-white to-slate-50/30 overflow-hidden ' + (mobileTab === 'case-record' ? 'flex-1' : 'hidden lg:flex lg:flex-1')}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
+        onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}
       >
         <div className="p-4 lg:p-8 lg:pb-4 flex flex-col lg:flex-row justify-between items-start lg:items-end shrink-0 gap-3 bg-white/80 backdrop-blur-sm border-b border-slate-100">
           <div>
             <h3 className="text-2xl lg:text-3xl font-black text-slate-800 flex items-center gap-3">
-              <i className="fas fa-clipboard-list" style={{ color: primaryColor }}></i>
-              ケース記録
+              <i className="fas fa-clipboard-list" style={{ color: primaryColor }}></i>ケース記録
             </h3>
             <p className="text-xs lg:text-sm text-slate-500 mt-1">{resident.name}様の1日の記録</p>
           </div>
           <div className="flex items-center gap-3 flex-wrap">
             <div className="flex items-center gap-2 bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
-              <div className="w-8 h-8 rounded-xl bg-[#01C1AF]/10 flex items-center justify-center text-[#01C1AF]">
-                <i className="fas fa-calendar"></i>
-              </div>
-              <input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                max={new Date().toISOString().split('T')[0]}
-                className="text-xs font-bold text-slate-700 border-none focus:outline-none cursor-pointer pr-2"
-              />
+              <div className="w-8 h-8 rounded-xl bg-[#01C1AF]/10 flex items-center justify-center text-[#01C1AF]"><i className="fas fa-calendar"></i></div>
+              <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} max={new Date().toISOString().split('T')[0]} className="text-xs font-bold text-slate-700 border-none focus:outline-none cursor-pointer pr-2" />
             </div>
             <div className="flex items-center gap-3 bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
-              <div className="w-8 h-8 rounded-xl bg-[#01C1AF]/10 flex items-center justify-center text-[#01C1AF]">
-                <i className="fas fa-user"></i>
-              </div>
+              <div className="w-8 h-8 rounded-xl bg-[#01C1AF]/10 flex items-center justify-center text-[#01C1AF]"><i className="fas fa-user"></i></div>
               <div className="pr-2">
                 <p className="text-[9px] font-black text-slate-400 leading-none mb-1">担当スタッフ</p>
-                <select
-                  value={currentStaff?.id || ''}
-                  onChange={(e) => setCurrentStaff(staff.find(s => s.id === Number(e.target.value)) || null)}
-                  className="text-xs font-bold text-slate-700 border-none focus:outline-none bg-transparent cursor-pointer"
-                >
-                  {staff.map(s => (
-                    <option key={s.id} value={s.id}>{s.name}</option>
-                  ))}
+                <select value={currentStaff?.id || ''} onChange={(e) => setCurrentStaff(staff.find(s => s.id === Number(e.target.value)) || null)} className="text-xs font-bold text-slate-700 border-none focus:outline-none bg-transparent cursor-pointer">
+                  {staff.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
               </div>
             </div>
@@ -550,14 +475,9 @@ const App = () => {
         </div>
 
         <div className="p-4 lg:p-8 lg:pt-0">
-          {/* タグ選択 */}
           <div className="flex gap-2 mb-2 flex-wrap">
-            {['食事', '排泄', '起床', '活動', '入浴', '就寝', 'ケア', '巡視', 'その他'].map(tag => (
-              <button
-                key={tag}
-                onClick={() => setRecordTag(tag)}
-                className={`text-[10px] font-bold px-2 py-1 rounded-full transition-all ${recordTag === tag ? 'bg-[#01C1AF] text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
-              >
+            {['食事', '排泤', '起床', '活動', '入浴', '就寝', 'ケア', '巡視', 'その他'].map(tag => (
+              <button key={tag} onClick={() => setRecordTag(tag)} className={`text-[10px] font-bold px-2 py-1 rounded-full transition-all ${recordTag === tag ? 'bg-[#01C1AF] text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
                 {tag}
               </button>
             ))}
@@ -566,19 +486,8 @@ const App = () => {
             <button className="w-12 h-12 lg:w-14 lg:h-14 bg-[#01C1AF] text-white rounded-[20px] lg:rounded-[24px] flex items-center justify-center shadow-lg hover:shadow-[#01C1AF]/40 transition-all active:scale-90">
               <i className="fas fa-microphone text-lg lg:text-xl"></i>
             </button>
-            <input
-              type="text"
-              value={newRecord}
-              onChange={(e) => setNewRecord(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleAddRecord()}
-              placeholder={`${resident.name}様との様子を記録`}
-              className="flex-1 px-3 lg:px-4 py-2 text-sm lg:text-base font-medium focus:outline-none placeholder:text-slate-300"
-            />
-            <button
-              onClick={handleAddRecord}
-              disabled={!newRecord.trim()}
-              className="w-12 h-12 lg:w-14 lg:h-14 bg-slate-50 text-slate-300 rounded-[20px] lg:rounded-[24px] flex items-center justify-center hover:text-[#01C1AF] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+            <input type="text" value={newRecord} onChange={(e) => setNewRecord(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleAddRecord()} placeholder={`${resident.name}様との様子を記録`} className="flex-1 px-3 lg:px-4 py-2 text-sm lg:text-base font-medium focus:outline-none placeholder:text-slate-300" />
+            <button onClick={handleAddRecord} disabled={!newRecord.trim()} className="w-12 h-12 lg:w-14 lg:h-14 bg-slate-50 text-slate-300 rounded-[20px] lg:rounded-[24px] flex items-center justify-center hover:text-[#01C1AF] transition-all disabled:opacity-50 disabled:cursor-not-allowed">
               <i className="fas fa-paper-plane text-lg lg:text-xl"></i>
             </button>
           </div>
@@ -588,9 +497,7 @@ const App = () => {
       {/* 右カラム：気づき・AIアシスタント */}
       <div
         className={'flex flex-col bg-slate-50/50 border-l border-slate-100 ' + (mobileTab === 'insights' ? 'flex-1' : 'hidden lg:flex lg:w-[22%]')}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
+        onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}
       >
         <div className="p-4 lg:p-8 lg:pb-4">
           <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 lg:mb-6 flex items-center gap-2">
@@ -598,10 +505,10 @@ const App = () => {
             <button
               onClick={handleDemoReset}
               disabled={resetting}
-              className="ml-auto text-[9px] font-black px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 transition-all disabled:opacity-50 flex items-center gap-1"
+              className="ml-auto text-[9px] font-black px-2 py-1 rounded-lg bg-[#01C1AF]/10 hover:bg-[#01C1AF]/20 text-[#01C1AF] transition-all disabled:opacity-50 flex items-center gap-1"
             >
-              <i className={`fas fa-rotate-right text-[9px] ${resetting ? 'animate-spin' : ''}`}></i>
-              {resetting ? 'リセット中...' : 'デモリセット'}
+              <i className={`fas fa-database text-[9px] ${resetting ? 'animate-pulse' : ''}`}></i>
+              {resetting ? '作成中...' : 'デモ用データ作成'}
             </button>
           </h3>
           <div className="bg-white p-4 lg:p-6 rounded-[24px] lg:rounded-[32px] shadow-sm border border-slate-100">
@@ -615,10 +522,7 @@ const App = () => {
               </span>
             </div>
             <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
-              <div
-                className="h-full transition-all duration-1000 ease-out rounded-full"
-                style={{ width: ((resident.maturation_day / 14) * 100) + '%', backgroundColor: primaryColor }}
-              ></div>
+              <div className="h-full transition-all duration-1000 ease-out rounded-full" style={{ width: ((resident.maturation_day / 14) * 100) + '%', backgroundColor: primaryColor }}></div>
             </div>
             <p className="text-[10px] text-slate-400 mt-4 leading-relaxed font-bold">
               入居から{resident.maturation_day}日が経ちました。<br />
@@ -629,49 +533,32 @@ const App = () => {
 
         <div className="px-4 lg:px-8 pb-4">
           {!showInsightForm ? (
-            <button
-              onClick={() => setShowInsightForm(true)}
-              className="w-full bg-amber-400 hover:bg-amber-500 text-white font-black py-3 lg:py-4 rounded-[20px] lg:rounded-[24px] shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2"
-            >
-              <i className="fas fa-lightbulb text-base lg:text-lg"></i>
-              気づきを書く
+            <button onClick={() => setShowInsightForm(true)} className="w-full bg-amber-400 hover:bg-amber-500 text-white font-black py-3 lg:py-4 rounded-[20px] lg:rounded-[24px] shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2">
+              <i className="fas fa-lightbulb text-base lg:text-lg"></i>気づきを書く
             </button>
           ) : (
             <div className="bg-white rounded-[20px] lg:rounded-[28px] p-4 lg:p-6 shadow-xl border-2 border-amber-400">
               <div className="flex items-center justify-between mb-4">
                 <h4 className="text-sm font-black text-slate-800 flex items-center gap-2">
-                  <i className="fas fa-lightbulb text-amber-500"></i>
-                  気づきを投稿
+                  <i className="fas fa-lightbulb text-amber-500"></i>気づきを投稿
                 </h4>
-                <button onClick={() => setShowInsightForm(false)} className="text-slate-400 hover:text-slate-600">
-                  <i className="fas fa-times"></i>
-                </button>
+                <button onClick={() => setShowInsightForm(false)} className="text-slate-400 hover:text-slate-600"><i className="fas fa-times"></i></button>
               </div>
               <div className="space-y-3">
                 <div>
                   <label className="text-[10px] font-black text-slate-500 uppercase block mb-2">種別</label>
                   <div className="flex gap-2">
-                    <button
-                      onClick={() => setInsightType('staff')}
-                      className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${insightType === 'staff' ? 'bg-amber-400 text-white' : 'bg-slate-100 text-slate-500'}`}
-                    >
+                    <button onClick={() => setInsightType('staff')} className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${insightType === 'staff' ? 'bg-amber-400 text-white' : 'bg-slate-100 text-slate-500'}`}>
                       <i className="fas fa-user mr-1"></i>スタッフの気づき
                     </button>
-                    <button
-                      onClick={() => setInsightType('ai')}
-                      className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${insightType === 'ai' ? 'bg-cyan-400 text-white' : 'bg-slate-100 text-slate-500'}`}
-                    >
+                    <button onClick={() => setInsightType('ai')} className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${insightType === 'ai' ? 'bg-cyan-400 text-white' : 'bg-slate-100 text-slate-500'}`}>
                       <i className="fas fa-brain mr-1"></i>AI提案
                     </button>
                   </div>
                 </div>
                 <div>
                   <label className="text-[10px] font-black text-slate-500 uppercase block mb-2">カテゴリ</label>
-                  <select
-                    value={insightCategory}
-                    onChange={(e) => setInsightCategory(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-400"
-                  >
+                  <select value={insightCategory} onChange={(e) => setInsightCategory(e.target.value)} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-400">
                     <option value="time">時間のフィット</option>
                     <option value="preference">好みのフィット</option>
                     <option value="tips">コツのフィット</option>
@@ -679,32 +566,16 @@ const App = () => {
                 </div>
                 <div>
                   <label className="text-[10px] font-black text-slate-500 uppercase block mb-2">関連時刻（任意）</label>
-                  <select
-                    value={insightTime}
-                    onChange={(e) => setInsightTime(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-400"
-                  >
+                  <select value={insightTime} onChange={(e) => setInsightTime(e.target.value)} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-400">
                     <option value="">指定なし</option>
-                    {carePlans.map(plan => (
-                      <option key={plan.id} value={plan.time}>{plan.time} {plan.activity}</option>
-                    ))}
+                    {carePlans.map(plan => <option key={plan.id} value={plan.time}>{plan.time} {plan.activity}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="text-[10px] font-black text-slate-500 uppercase block mb-2">気づきの内容</label>
-                  <textarea
-                    value={insightContent}
-                    onChange={(e) => setInsightContent(e.target.value)}
-                    placeholder="例：最近は8:15まで熟睡されています。"
-                    rows={4}
-                    className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none"
-                  ></textarea>
+                  <textarea value={insightContent} onChange={(e) => setInsightContent(e.target.value)} placeholder="例：最近は8:15まで熟睡されています。" rows={4} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none"></textarea>
                 </div>
-                <button
-                  onClick={handleAddInsight}
-                  disabled={!insightContent.trim()}
-                  className="w-full bg-amber-400 hover:bg-amber-500 text-white font-black py-3 rounded-xl shadow-md transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
+                <button onClick={handleAddInsight} disabled={!insightContent.trim()} className="w-full bg-amber-400 hover:bg-amber-500 text-white font-black py-3 rounded-xl shadow-md transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
                   投稿する
                 </button>
               </div>
@@ -716,48 +587,36 @@ const App = () => {
           <div className="mb-4">
             <div className="flex items-center justify-between mb-3">
               <h4 className="text-sm font-black text-slate-800 flex items-center gap-2">
-                <i className="fas fa-sticky-note text-amber-400"></i>
-                気づきのストック
+                <i className="fas fa-sticky-note text-amber-400"></i>気づきのストック
               </h4>
               <span className="bg-amber-400 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-black shadow-md">{stickyNotes.length}</span>
             </div>
             <p className="text-xs text-slate-500 leading-relaxed">
               スタッフの気づきとAIの提案をストックしています。<br />
-              <span className="font-bold text-amber-600">「とりいれる」</span>ボタンで24時間シートに反映できます。
+              <span className="font-bold text-amber-600">「とりいれる」</span>ボタンの24時間シートに反映できます。
             </p>
           </div>
-
           {stickyNotes.map((note) => (
             <div key={note.id} className="bg-gradient-to-br from-amber-50 to-white p-5 lg:p-6 rounded-[24px] lg:rounded-[32px] border-2 border-amber-200 shadow-lg text-[11px] group hover:shadow-2xl hover:border-amber-300 transition-all transform hover:scale-[1.02] relative">
               <div className="absolute -top-1 -right-1 w-6 h-6 bg-amber-400 rounded-full"></div>
               <div className="flex justify-between items-start mb-3">
                 <div className={'px-3 py-1.5 rounded-full text-[9px] font-black uppercase shadow-sm ' + (note.note_type === 'ai' ? 'bg-cyan-100 text-cyan-700 border border-cyan-200' : 'bg-amber-100 text-amber-700 border border-amber-200')}>
-                  <i className={(note.note_type === 'ai' ? 'fas fa-brain' : 'fas fa-user') + ' mr-1'}></i>
-                  {note.source}
+                  <i className={(note.note_type === 'ai' ? 'fas fa-brain' : 'fas fa-user') + ' mr-1'}></i>{note.source}
                 </div>
                 <span className="text-[10px] text-slate-400 font-bold">{note.time || '時刻未指定'}</span>
               </div>
               <p className="font-black text-slate-800 mb-2 text-sm">{note.title}</p>
               <p className="text-slate-600 leading-relaxed font-medium mb-4">{note.content}</p>
               <div className="flex gap-2">
-                <button
-                  onClick={() => handleStickyNoteAction(note.id, 'adopted')}
-                  className="flex-1 bg-gradient-to-r from-teal-500 to-[#01C1AF] hover:from-teal-600 hover:to-[#00A89D] text-white font-black py-3 px-4 rounded-2xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 text-sm"
-                >
-                  <i className="fas fa-check-circle text-base"></i>
-                  とりいれる
+                <button onClick={() => handleStickyNoteAction(note.id, 'adopted')} className="flex-1 bg-gradient-to-r from-teal-500 to-[#01C1AF] hover:from-teal-600 hover:to-[#00A89D] text-white font-black py-3 px-4 rounded-2xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 text-sm">
+                  <i className="fas fa-check-circle text-base"></i>とりいれる
                 </button>
-                <button
-                  onClick={() => handleStickyNoteAction(note.id, 'rejected')}
-                  className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 px-4 rounded-2xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2 text-sm"
-                >
-                  <i className="fas fa-times-circle text-base"></i>
-                  まだそのまま
+                <button onClick={() => handleStickyNoteAction(note.id, 'rejected')} className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 px-4 rounded-2xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2 text-sm">
+                  <i className="fas fa-times-circle text-base"></i>まだそのまま
                 </button>
               </div>
             </div>
           ))}
-
           {stickyNotes.length === 0 && (
             <div className="text-center py-8 text-slate-400">
               <i className="fas fa-sticky-note text-3xl mb-3"></i>
@@ -766,7 +625,6 @@ const App = () => {
           )}
         </div>
 
-        {/* AI相談窓口（PCのみ） */}
         <div className="hidden lg:block p-8 pt-0 mt-auto">
           <div className="bg-slate-900 rounded-[32px] p-6 text-white shadow-2xl relative overflow-hidden group">
             <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-[#01C1AF] rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
@@ -781,25 +639,9 @@ const App = () => {
               「最近よく笑う時間はいつ？」
             </p>
             <div className="relative z-10 mb-4">
-              <input
-                type="text"
-                value={aiQuery}
-                onChange={(e) => setAiQuery(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && !aiLoading && handleAiQuery()}
-                placeholder="質問してみる..."
-                className="w-full bg-white/10 border border-white/10 rounded-2xl px-4 py-3 text-[11px] text-white placeholder:text-slate-500 focus:outline-none focus:bg-white/20 transition-all"
-                disabled={aiLoading}
-              />
-              <button
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-[#01C1AF] disabled:text-slate-600 hover:text-[#00a89a] transition-colors"
-                disabled={!aiQuery || aiLoading}
-                onClick={handleAiQuery}
-              >
-                {aiLoading ? (
-                  <i className="fas fa-spinner fa-spin text-sm"></i>
-                ) : (
-                  <i className="fas fa-paper-plane text-sm"></i>
-                )}
+              <input type="text" value={aiQuery} onChange={(e) => setAiQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && !aiLoading && handleAiQuery()} placeholder="質問してみる..." className="w-full bg-white/10 border border-white/10 rounded-2xl px-4 py-3 text-[11px] text-white placeholder:text-slate-500 focus:outline-none focus:bg-white/20 transition-all" disabled={aiLoading} />
+              <button className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-[#01C1AF] disabled:text-slate-600 hover:text-[#00a89a] transition-colors" disabled={!aiQuery || aiLoading} onClick={handleAiQuery}>
+                {aiLoading ? <i className="fas fa-spinner fa-spin text-sm"></i> : <i className="fas fa-paper-plane text-sm"></i>}
               </button>
             </div>
             {aiResponse && (
