@@ -475,12 +475,15 @@ const App = () => {
         </div>
 
         <div className="p-4 lg:p-8 lg:pt-0">
-          <div className="flex gap-2 mb-2 flex-wrap">
+          <div className="mb-2">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">📌 タグを選んで記録</p>
+            <div className="flex gap-2 flex-wrap">
             {['食事', '排泤', '起床', '活動', '入浴', '就寝', 'ケア', '巡視', 'その他'].map(tag => (
               <button key={tag} onClick={() => setRecordTag(tag)} className={`text-[10px] font-bold px-2 py-1 rounded-full transition-all ${recordTag === tag ? 'bg-[#01C1AF] text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
                 {tag}
               </button>
             ))}
+            </div>
           </div>
           <div className="bg-white rounded-[24px] lg:rounded-[32px] shadow-2xl p-2 flex items-center gap-2 lg:gap-3 border border-slate-100 focus-within:ring-4 focus-within:ring-[#01C1AF]/10 transition-all">
             <button className="w-12 h-12 lg:w-14 lg:h-14 bg-[#01C1AF] text-white rounded-[20px] lg:rounded-[24px] flex items-center justify-center shadow-lg hover:shadow-[#01C1AF]/40 transition-all active:scale-90">
