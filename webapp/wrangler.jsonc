@@ -10,11 +10,7 @@
     {
       "binding": "DB",
       "database_name": "care-fit-cycle-db",
-      // TODO: Cloudflare ダッシュボード → Workers & Pages → D1 で
-      //       "care-fit-cycle-db" を作成して database_id をここに入力してください
-      //       作成後: wrangler d1 migrations apply care-fit-cycle-db
-      //              wrangler d1 execute care-fit-cycle-db --file=./seed.sql
-      "database_id": ""
+      "database_id": "284c5e7b-0723-44df-96a2-44c0d56090fa"
     }
   ]
   // 環境変数は Cloudflare Pages ダッシュボード → Settings → Environment Variables で設定:
