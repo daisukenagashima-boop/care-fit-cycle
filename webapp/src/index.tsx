@@ -402,6 +402,87 @@ app.get('/api/residents/:id/care-plans/export', async (c) => {
 })
 
 // ============================================
+// デモリセット
+// ============================================
+
+app.post('/api/demo/reset', async (c) => {
+  try {
+    const today = new Date().toISOString().split('T')[0]
+    const d = new Date()
+    d.setDate(d.getDate() - 1)
+    const yesterday = d.toISOString().split('T')[0]
+
+    // 全データ削除
+    await c.env.DB.batch([
+      c.env.DB.prepare('DELETE FROM sticky_notes'),
+      c.env.DB.prepare('DELETE FROM case_records'),
+      c.env.DB.prepare('DELETE FROM care_plans'),
+      c.env.DB.prepare('DELETE FROM staff'),
+      c.env.DB.prepare('DELETE FROM residents'),
+    ])
+
+    // 基本データ投入
+    await c.env.DB.batch([
+      c.env.DB.prepare(`INSERT INTO residents (id, name, care_level, favorite_things, today_wish, maturation_day, phase) VALUES (1, '岡田 一輝', '要介護4', '朝のコーヒーと庭の花を眺める時間が好き', '天気が良いので、午後は中庭へ出てみたい', 10, 'fitting')`),
+      c.env.DB.prepare(`INSERT INTO staff (id, name, years_experience, position) VALUES (1, '田中 健二', 3, 'スタッフ')`),
+      c.env.DB.prepare(`INSERT INTO staff (id, name, years_experience, position) VALUES (2, '鈴木 美咲', 1, '新人')`),
+      c.env.DB.prepare(`INSERT INTO staff (id, name, years_experience, position) VALUES (3, '佐藤 太郎', 8, 'リーダー')`),
+    ])
+
+    // 24時間シート
+    await c.env.DB.batch([
+      c.env.DB.prepare(`INSERT INTO care_plans (id, resident_id, time, activity, details, status, display_order) VALUES (1, 1, '07:00', '起床・洗面', 'カーテンを開け日光を入れる。右側から声をかける。', 'fit', 1)`),
+      c.env.DB.prepare(`INSERT INTO care_plans (id, resident_id, time, activity, details, status, display_order) VALUES (2, 1, '08:00', '朝食', '椅子に深く座るよう促す。お茶は熱めを希望。', 'plan', 2)`),
+      c.env.DB.prepare(`INSERT INTO care_plans (id, resident_id, time, activity, details, status, display_order) VALUES (3, 1, '10:00', '排泄介助', 'トイレ誘導。立位保持を介助。', 'fit', 3)`),
+      c.env.DB.prepare(`INSERT INTO care_plans (id, resident_id, time, activity, details, status, display_order) VALUES (4, 1, '12:00', '昼食', '主食は一口大。副食は刻み。', 'plan', 4)`),
+      c.env.DB.prepare(`INSERT INTO care_plans (id, resident_id, time, activity, details, status, display_order) VALUES (5, 1, '14:00', '午睡・休憩', '静かな環境で休んでいただく。', 'plan', 5)`),
+      c.env.DB.prepare(`INSERT INTO care_plans (id, resident_id, time, activity, details, status, display_order) VALUES (6, 1, '15:00', 'おやつ', '季節の果物やお茶を提供。', 'plan', 6)`),
+      c.env.DB.prepare(`INSERT INTO care_plans (id, resident_id, time, activity, details, status, display_order) VALUES (7, 1, '18:00', '夕食', '主食は一口大。副食は刻み。温かい汁物を添える。', 'plan', 7)`),
+      c.env.DB.prepare(`INSERT INTO care_plans (id, resident_id, time, activity, details, status, display_order) VALUES (8, 1, '20:00', '入浴・清拭', '週3回入浴。それ以外は清拭で対応。', 'fit', 8)`),
+      c.env.DB.prepare(`INSERT INTO care_plans (id, resident_id, time, activity, details, status, display_order) VALUES (9, 1, '21:00', '就寝準備', '照明を落とし、静かな音楽をかける。', 'plan', 9)`),
+    ])
+
+    // 昨日のケース記録
+    await c.env.DB.batch([
+      c.env.DB.prepare(`INSERT INTO case_records (resident_id, staff_id, record_time, content, tag, record_type, has_alert, recorded_date) VALUES (1, 1, '06:30', '巡視時、すでに目を覚ましておられる様子。「おはよう」と声をかけると笑顔で応えられました。', '起床', 'manual', 0, ?)`).bind(yesterday),
+      c.env.DB.prepare(`INSERT INTO case_records (resident_id, staff_id, record_time, content, tag, record_type, has_alert, recorded_date) VALUES (1, 1, '07:20', '洗面介助。右手で歯ブラシを持ち、ご自身で磨かれる。「気持ちいい」と満足そう。', '洗面', 'manual', 0, ?)`).bind(yesterday),
+      c.env.DB.prepare(`INSERT INTO case_records (resident_id, staff_id, record_time, content, tag, record_type, has_alert, recorded_date) VALUES (1, 1, '08:15', '「コーヒーが飲みたい」とのリクエスト。コーヒーを提供。香りを楽しまれている様子。', '食事', 'manual', 1, ?)`).bind(yesterday),
+      c.env.DB.prepare(`INSERT INTO case_records (resident_id, staff_id, record_time, content, tag, record_type, has_alert, recorded_date) VALUES (1, 2, '10:00', 'トイレ誘導。「ありがとう」と言いながらゆっくり立ち上がられる。', '排泄', 'manual', 0, ?)`).bind(yesterday),
+      c.env.DB.prepare(`INSERT INTO case_records (resident_id, staff_id, record_time, content, tag, record_type, has_alert, recorded_date) VALUES (1, 3, '10:45', '他の入居者様と談笑中。昔の仕事の話をされて、皆さん楽しそう。', '活動', 'manual', 0, ?)`).bind(yesterday),
+      c.env.DB.prepare(`INSERT INTO case_records (resident_id, staff_id, record_time, content, tag, record_type, has_alert, recorded_date) VALUES (1, 1, '12:20', '魚の煮付けが気に入られた様子。「これ美味しい」と2回もおっしゃる。', '食事', 'manual', 0, ?)`).bind(yesterday),
+      c.env.DB.prepare(`INSERT INTO case_records (resident_id, staff_id, record_time, content, tag, record_type, has_alert, recorded_date) VALUES (1, 3, '14:00', '「今日は眠くない」と午睡を断られる。リビングで過ごされることに。', '活動', 'manual', 1, ?)`).bind(yesterday),
+      c.env.DB.prepare(`INSERT INTO case_records (resident_id, staff_id, record_time, content, tag, record_type, has_alert, recorded_date) VALUES (1, 3, '14:30', '中庭へ外出。「気持ちいい風だね」と喜ばれる。花壇の花を眺めて笑顔。', '活動', 'manual', 0, ?)`).bind(yesterday),
+      c.env.DB.prepare(`INSERT INTO case_records (resident_id, staff_id, record_time, content, tag, record_type, has_alert, recorded_date) VALUES (1, 2, '15:10', 'おやつ。いちごとコーヒーを提供。「甘くて美味しい」と完食。', '食事', 'manual', 0, ?)`).bind(yesterday),
+      c.env.DB.prepare(`INSERT INTO case_records (resident_id, staff_id, record_time, content, tag, record_type, has_alert, recorded_date) VALUES (1, 1, '18:45', '夕食9割摂取。「ごちそうさま」と満足そう。', '食事', 'manual', 0, ?)`).bind(yesterday),
+      c.env.DB.prepare(`INSERT INTO case_records (resident_id, staff_id, record_time, content, tag, record_type, has_alert, recorded_date) VALUES (1, 1, '20:10', '入浴日。浴室へ誘導。「お風呂は気持ちいいね」と笑顔。', '入浴', 'manual', 0, ?)`).bind(yesterday),
+      c.env.DB.prepare(`INSERT INTO case_records (resident_id, staff_id, record_time, content, tag, record_type, has_alert, recorded_date) VALUES (1, 2, '21:30', 'ベッドへ横になられる。「おやすみなさい」と穏やかな表情。', '就寝', 'manual', 0, ?)`).bind(yesterday),
+    ])
+
+    // 今日のケース記録
+    await c.env.DB.batch([
+      c.env.DB.prepare(`INSERT INTO case_records (resident_id, staff_id, record_time, content, tag, record_type, has_alert, recorded_date) VALUES (1, 1, '07:00', '起床。「よく眠れた」との言葉。今日は朝から笑顔。', '起床', 'manual', 0, ?)`).bind(today),
+      c.env.DB.prepare(`INSERT INTO case_records (resident_id, staff_id, record_time, content, tag, record_type, has_alert, recorded_date) VALUES (1, 1, '07:30', '洗面介助。ご自身で丁寧に洗顔される。タオルで顔を拭く動作もスムーズ。', '洗面', 'manual', 0, ?)`).bind(today),
+      c.env.DB.prepare(`INSERT INTO case_records (resident_id, staff_id, record_time, content, tag, record_type, has_alert, recorded_date) VALUES (1, 2, '08:10', '朝食開始。今日はご飯と焼き魚。「魚が美味しい」と喜ばれる。', '食事', 'manual', 0, ?)`).bind(today),
+      c.env.DB.prepare(`INSERT INTO case_records (resident_id, staff_id, record_time, content, tag, record_type, has_alert, recorded_date) VALUES (1, 2, '08:30', 'コーヒーを提供。「このコーヒーの香りが好き」と満足そう。', '食事', 'manual', 0, ?)`).bind(today),
+      c.env.DB.prepare(`INSERT INTO case_records (resident_id, staff_id, record_time, content, tag, record_type, has_alert, recorded_date) VALUES (1, 3, '09:30', 'リビングで本を読んでおられる。集中して読書されている様子。', '活動', 'quick', 0, ?)`).bind(today),
+      c.env.DB.prepare(`INSERT INTO case_records (resident_id, staff_id, record_time, content, tag, record_type, has_alert, recorded_date) VALUES (1, 3, '10:15', 'トイレ誘導。「ありがとう」と感謝の言葉。排泄スムーズ。', '排泄', 'manual', 0, ?)`).bind(today),
+    ])
+
+    // 付せん
+    await c.env.DB.batch([
+      c.env.DB.prepare(`INSERT INTO sticky_notes (id, resident_id, care_plan_id, note_type, fit_category, time, title, content, source, status) VALUES (1, 1, 2, 'ai', 'time', '08:00', '時間のフィット提案', '最近は8:15まで熟睡されています。ゆっくりお休みいただくのはいかがでしょうか？', 'AI分析', 'pending')`),
+      c.env.DB.prepare(`INSERT INTO sticky_notes (id, resident_id, care_plan_id, note_type, fit_category, time, title, content, source, status) VALUES (2, 1, 5, 'staff', 'preference', '14:00', 'リーダーの気づき', '最近、寝るよりもリビングで誰かとお話ししたいご様子です', 'スタッフ：佐藤', 'pending')`),
+      c.env.DB.prepare(`INSERT INTO sticky_notes (id, resident_id, care_plan_id, note_type, fit_category, time, title, content, source, status) VALUES (3, 1, 2, 'ai', 'preference', '08:00', '好みのフィット提案', 'お茶よりもコーヒーの香りで笑顔が増えています。午後のティータイムにコーヒーを追加しますか？', 'AI分析', 'pending')`),
+    ])
+
+    return c.json({ success: true, message: 'デモデータをリセットしました' })
+  } catch (error) {
+    console.error('Demo reset error:', error)
+    return c.json({ error: 'Reset failed', message: error instanceof Error ? error.message : 'Unknown error' }, 500)
+  }
+})
+
+// ============================================
 // Frontend
 // ============================================
 

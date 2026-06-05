@@ -74,11 +74,15 @@ const App = () => {
   const [aiResponse, setAiResponse] = useState('')
   const [aiLoading, setAiLoading] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [resetting, setResetting] = useState(false)
 
   const [showInsightForm, setShowInsightForm] = useState(false)
   const [insightContent, setInsightContent] = useState('')
   const [insightCategory, setInsightCategory] = useState('preference')
   const [insightTime, setInsightTime] = useState('')
+  const [insightType, setInsightType] = useState<'staff' | 'ai'>('staff')
+
+  const [recordTag, setRecordTag] = useState('その他')
 
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
   const [mobileTab, setMobileTab] = useState('case-record')
@@ -129,6 +133,20 @@ const App = () => {
     }
   }
 
+  const handleDemoReset = async () => {
+    if (!window.confirm('デモデータをリセットしますか？現在のデータは全て消えます。')) return
+    setResetting(true)
+    try {
+      await axios.post('/api/demo/reset')
+      setSelectedDate(new Date().toISOString().split('T')[0])
+      await fetchAllData()
+    } catch (error) {
+      console.error('リセットエラー:', error)
+    } finally {
+      setResetting(false)
+    }
+  }
+
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchStart(e.targetTouches[0].clientX)
     setTouchStartY(e.targetTouches[0].clientY)
@@ -170,7 +188,7 @@ const App = () => {
         staff_id: currentStaff.id,
         record_time: recordTime,
         content: newRecord,
-        tag: 'その他',
+        tag: recordTag,
         record_type: 'manual',
       })
       setNewRecord('')
@@ -199,17 +217,18 @@ const App = () => {
     try {
       await axios.post('/api/sticky-notes', {
         resident_id: residentId,
-        note_type: 'staff',
+        note_type: insightType,
         fit_category: insightCategory,
         time: insightTime || null,
         title: categoryTitles[insightCategory],
         content: insightContent,
-        source: `スタッフ：${currentStaff.name}`,
+        source: insightType === 'ai' ? 'AI分析' : `スタッフ：${currentStaff.name}`,
         status: 'pending',
       })
       setInsightContent('')
       setInsightCategory('preference')
       setInsightTime('')
+      setInsightType('staff')
       setShowInsightForm(false)
       fetchAllData()
     } catch (error) {
@@ -483,12 +502,18 @@ const App = () => {
               <div className="w-8 h-8 rounded-xl bg-[#01C1AF]/10 flex items-center justify-center text-[#01C1AF]">
                 <i className="fas fa-user"></i>
               </div>
-              {currentStaff && (
-                <div className="pr-2">
-                  <p className="text-[9px] font-black text-slate-400 leading-none">担当スタッフ</p>
-                  <p className="text-xs font-bold text-slate-700 uppercase">{currentStaff.name}</p>
-                </div>
-              )}
+              <div className="pr-2">
+                <p className="text-[9px] font-black text-slate-400 leading-none mb-1">担当スタッフ</p>
+                <select
+                  value={currentStaff?.id || ''}
+                  onChange={(e) => setCurrentStaff(staff.find(s => s.id === Number(e.target.value)) || null)}
+                  className="text-xs font-bold text-slate-700 border-none focus:outline-none bg-transparent cursor-pointer"
+                >
+                  {staff.map(s => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
         </div>
@@ -525,6 +550,18 @@ const App = () => {
         </div>
 
         <div className="p-4 lg:p-8 lg:pt-0">
+          {/* タグ選択 */}
+          <div className="flex gap-2 mb-2 flex-wrap">
+            {['食事', '排泄', '起床', '活動', '入浴', '就寝', 'ケア', '巡視', 'その他'].map(tag => (
+              <button
+                key={tag}
+                onClick={() => setRecordTag(tag)}
+                className={`text-[10px] font-bold px-2 py-1 rounded-full transition-all ${recordTag === tag ? 'bg-[#01C1AF] text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
           <div className="bg-white rounded-[24px] lg:rounded-[32px] shadow-2xl p-2 flex items-center gap-2 lg:gap-3 border border-slate-100 focus-within:ring-4 focus-within:ring-[#01C1AF]/10 transition-all">
             <button className="w-12 h-12 lg:w-14 lg:h-14 bg-[#01C1AF] text-white rounded-[20px] lg:rounded-[24px] flex items-center justify-center shadow-lg hover:shadow-[#01C1AF]/40 transition-all active:scale-90">
               <i className="fas fa-microphone text-lg lg:text-xl"></i>
@@ -558,6 +595,14 @@ const App = () => {
         <div className="p-4 lg:p-8 lg:pb-4">
           <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 lg:mb-6 flex items-center gap-2">
             <i className="fas fa-chart-line" style={{ color: primaryColor }}></i> Care Fit Cycle
+            <button
+              onClick={handleDemoReset}
+              disabled={resetting}
+              className="ml-auto text-[9px] font-black px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 transition-all disabled:opacity-50 flex items-center gap-1"
+            >
+              <i className={`fas fa-rotate-right text-[9px] ${resetting ? 'animate-spin' : ''}`}></i>
+              {resetting ? 'リセット中...' : 'デモリセット'}
+            </button>
           </h3>
           <div className="bg-white p-4 lg:p-6 rounded-[24px] lg:rounded-[32px] shadow-sm border border-slate-100">
             <div className="flex justify-between items-end mb-3">
@@ -603,6 +648,23 @@ const App = () => {
                 </button>
               </div>
               <div className="space-y-3">
+                <div>
+                  <label className="text-[10px] font-black text-slate-500 uppercase block mb-2">種別</label>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setInsightType('staff')}
+                      className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${insightType === 'staff' ? 'bg-amber-400 text-white' : 'bg-slate-100 text-slate-500'}`}
+                    >
+                      <i className="fas fa-user mr-1"></i>スタッフの気づき
+                    </button>
+                    <button
+                      onClick={() => setInsightType('ai')}
+                      className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${insightType === 'ai' ? 'bg-cyan-400 text-white' : 'bg-slate-100 text-slate-500'}`}
+                    >
+                      <i className="fas fa-brain mr-1"></i>AI提案
+                    </button>
+                  </div>
+                </div>
                 <div>
                   <label className="text-[10px] font-black text-slate-500 uppercase block mb-2">カテゴリ</label>
                   <select
