@@ -389,46 +389,22 @@ const App = () => {
         </div>
         <div className="flex-1 overflow-y-auto px-4 lg:px-6 pb-8 space-y-4 lg:space-y-6 relative">
           <div className="absolute left-8 lg:left-11 top-0 bottom-0 w-px bg-slate-100 -z-0"></div>
-          {carePlans.map((item) => {
-            const notesForThisTime = stickyNotesByTime[item.time] || []
-            return (
-              <div key={item.id} className="relative z-10">
-                <div className="flex items-start gap-4 lg:gap-6">
-                  <div className="bg-white border-2 rounded-2xl p-1 text-[10px] font-bold w-10 h-10 flex items-center justify-center shrink-0 shadow-sm transition-all" style={{ borderColor: item.status === 'fit' ? primaryColor : '#E2E8F0', color: item.status === 'fit' ? primaryColor : '#94A3B8', transform: item.status === 'fit' ? 'scale(1.1)' : 'scale(1)' }}>
-                    {item.time}
+          {carePlans.map((item) => (
+            <div key={item.id} className="relative z-10">
+              <div className="flex items-start gap-4 lg:gap-6">
+                <div className="bg-white border-2 rounded-2xl p-1 text-[10px] font-bold w-10 h-10 flex items-center justify-center shrink-0 shadow-sm transition-all" style={{ borderColor: item.status === 'fit' ? primaryColor : '#E2E8F0', color: item.status === 'fit' ? primaryColor : '#94A3B8', transform: item.status === 'fit' ? 'scale(1.1)' : 'scale(1)' }}>
+                  {item.time}
+                </div>
+                <div className={'flex-1 p-3 lg:p-4 rounded-3xl border transition-all relative ' + (item.status === 'fit' ? 'border-teal-50 bg-teal-50/20 shadow-sm' : 'border-slate-100 bg-white')}>
+                  <div className="flex justify-between items-start">
+                    <span className="font-black text-sm text-slate-700">{item.activity}</span>
+                    {item.status === 'fit' && <div className="bg-teal-500 text-white p-1 rounded-full"><i className="fas fa-check text-[8px]"></i></div>}
                   </div>
-                  <div className={'flex-1 p-3 lg:p-4 rounded-3xl border transition-all relative ' + (item.status === 'fit' ? 'border-teal-50 bg-teal-50/20 shadow-sm' : 'border-slate-100 bg-white')}>
-                    <div className="flex justify-between items-start">
-                      <span className="font-black text-sm text-slate-700">{item.activity}</span>
-                      {item.status === 'fit' && <div className="bg-teal-500 text-white p-1 rounded-full"><i className="fas fa-check text-[8px]"></i></div>}
-                    </div>
-                    <p className="text-[11px] text-slate-500 mt-1.5 leading-relaxed font-medium">{item.details}</p>
-                    {notesForThisTime.map(note => (
-                      <div key={note.id} className={'mt-4 p-4 rounded-2xl shadow-lg border-2 transform hover:scale-[1.02] transition-all cursor-pointer relative ' + (note.note_type === 'ai' ? 'bg-gradient-to-br from-cyan-50 to-white border-cyan-300' : 'bg-gradient-to-br from-amber-50 to-white border-amber-300')}>
-                        <div className={'absolute -top-2 -right-2 w-8 h-8 rounded-full shadow-md ' + (note.note_type === 'ai' ? 'bg-cyan-400' : 'bg-amber-400')}></div>
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className={'px-2 py-1 rounded-full text-[9px] font-black uppercase ' + (note.note_type === 'ai' ? 'bg-cyan-100 text-cyan-700' : 'bg-amber-100 text-amber-700')}>
-                            <i className={(note.note_type === 'ai' ? 'fas fa-brain' : 'fas fa-user') + ' mr-1'}></i>{note.source}
-                          </div>
-                          <span className="text-[9px] font-bold text-slate-400">{note.fit_category === 'time' ? '時間のフィット' : note.fit_category === 'preference' ? '好みのフィット' : 'コツのフィット'}</span>
-                        </div>
-                        <p className="font-black text-sm text-slate-800 mb-2">{note.title}</p>
-                        <p className="text-xs leading-relaxed font-medium text-slate-600 mb-3">{note.content}</p>
-                        <div className="flex gap-2">
-                          <button onClick={() => handleStickyNoteAction(note.id, 'adopted')} className="flex-1 bg-gradient-to-r from-teal-500 to-[#01C1AF] hover:from-teal-600 hover:to-[#00A89D] text-white text-xs font-black py-2 px-3 rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-1">
-                            <i className="fas fa-check-circle"></i>とりいれる
-                          </button>
-                          <button onClick={() => handleStickyNoteAction(note.id, 'rejected')} className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold py-2 px-3 rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1">
-                            <i className="fas fa-times-circle"></i>まだそのまま
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <p className="text-[11px] text-slate-500 mt-1.5 leading-relaxed font-medium">{item.details}</p>
                 </div>
               </div>
-            )
-          })}
+            </div>
+          ))}
         </div>
       </div>
 
