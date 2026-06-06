@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
+import SheetPage from './SheetPage'
 
 // ============================================
 // Types
@@ -75,6 +76,7 @@ const App = () => {
   const [aiLoading, setAiLoading] = useState(false)
   const [loading, setLoading] = useState(true)
   const [resetting, setResetting] = useState(false)
+  const [currentView, setCurrentView] = useState<'main' | 'sheet'>('main')
 
   const [showInsightForm, setShowInsightForm] = useState(false)
   const [insightContent, setInsightContent] = useState('')
@@ -278,6 +280,8 @@ const App = () => {
     )
   }
 
+  if (currentView === 'sheet') return <SheetPage residentId={residentId} onBack={() => setCurrentView('main')} />
+
   const stickyNotesByTime: Record<string, StickyNote[]> = {}
   stickyNotes.forEach(note => {
     if (note.time) {
@@ -307,6 +311,13 @@ const App = () => {
             </div>
             <p className="text-xs text-slate-400 font-medium">Day {resident.maturation_day}/14</p>
           </div>
+          <button
+            onClick={() => setCurrentView('sheet')}
+            className="text-[10px] font-black px-3 py-2 rounded-xl text-white flex items-center gap-1 shadow-sm"
+            style={{ backgroundColor: primaryColor }}
+          >
+            <i className="fas fa-table"></i> シート
+          </button>
         </div>
       </div>
 
@@ -355,7 +366,7 @@ const App = () => {
             </div>
             <p className="text-xs font-bold text-slate-600">「{resident.today_wish}」</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 mb-2">
             <a href={`/api/residents/${residentId}/care-plans/export?format=html`} target="_blank" rel="noreferrer" className="flex-1 bg-gradient-to-r from-teal-500 to-[#01C1AF] hover:from-teal-600 hover:to-[#00A89D] text-white text-[10px] font-bold py-2 px-3 rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-1">
               <i className="fas fa-print"></i>印刷
             </a>
@@ -363,6 +374,13 @@ const App = () => {
               <i className="fas fa-file-csv"></i>CSV
             </a>
           </div>
+          <button
+            onClick={() => setCurrentView('sheet')}
+            className="w-full text-[10px] font-bold py-2 px-3 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-1 border"
+            style={{ borderColor: primaryColor, color: primaryColor }}
+          >
+            <i className="fas fa-table"></i>24Hシート管理
+          </button>
         </div>
         <div className="px-4 lg:px-6 py-2">
           <h3 className="text-xs font-black text-slate-300 uppercase tracking-widest flex items-center gap-2 mb-4">
