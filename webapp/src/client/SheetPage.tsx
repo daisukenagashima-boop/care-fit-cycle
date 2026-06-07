@@ -53,9 +53,10 @@ const FIELD_OPTIONS = [
 interface SheetPageProps {
   residentId: number
   onBack: () => void
+  onNavigate?: (view: 'main' | 'care-plan') => void
 }
 
-const SheetPage = ({ residentId, onBack }: SheetPageProps) => {
+const SheetPage = ({ residentId, onBack, onNavigate }: SheetPageProps) => {
   const [resident, setResident] = useState<Resident | null>(null)
   const [carePlans, setCarePlans] = useState<CarePlanDetail[]>([])
   const [stickyNotes, setStickyNotes] = useState<StickyNote[]>([])
@@ -146,18 +147,30 @@ const SheetPage = ({ residentId, onBack }: SheetPageProps) => {
   return (
     <div className="flex flex-col h-screen bg-[#FDFCF9]">
       {/* Header */}
-      <header className="bg-white border-b border-slate-100 px-4 lg:px-6 py-4 flex items-center gap-3 shrink-0 shadow-sm">
-        <button onClick={onBack} className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors">
-          <i className="fas fa-arrow-left"></i>
-          <span className="hidden lg:inline">記録に戻る</span>
+      <header className="bg-white border-b border-slate-100 px-4 lg:px-6 py-3 flex items-center gap-3 shrink-0 shadow-sm">
+        <button onClick={onBack} className="flex items-center gap-1.5 text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors shrink-0">
+          <i className="fas fa-home text-xs"></i>
+          <span className="hidden lg:inline text-xs">ホーム</span>
         </button>
-        <div className="w-px h-6 bg-slate-200"></div>
+        {/* PC横断リンク */}
+        {onNavigate && (
+          <nav className="hidden lg:flex items-center gap-1 ml-1">
+            <div className="w-px h-4 bg-slate-200 mr-1"></div>
+            <button onClick={() => onNavigate('main')}
+              className="text-xs font-bold px-2.5 py-1 rounded-lg text-slate-500 hover:bg-slate-100 transition-colors">
+              記録
+            </button>
+            <span className="text-xs font-black px-2.5 py-1 rounded-lg text-white" style={{ backgroundColor: primaryColor }}>
+              24Hシート
+            </span>
+            <button onClick={() => onNavigate('care-plan')}
+              className="text-xs font-bold px-2.5 py-1 rounded-lg text-slate-500 hover:bg-slate-100 transition-colors">
+              計画書
+            </button>
+          </nav>
+        )}
         <div className="flex-1 min-w-0">
-          <h1 className="text-base lg:text-lg font-black text-slate-800 flex items-center gap-2">
-            <i className="fas fa-clock" style={{ color: primaryColor }}></i>
-            {resident?.name} 様の24時間シート
-          </h1>
-          <p className="text-[10px] text-slate-400">{fitCount}/{carePlans.length} フィット済み ・ 付せん {stickyNotes.length} 件</p>
+          <p className="text-[10px] text-slate-400 hidden lg:block">{fitCount}/{carePlans.length} フィット済み ・ 付せん {stickyNotes.length} 件</p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <a

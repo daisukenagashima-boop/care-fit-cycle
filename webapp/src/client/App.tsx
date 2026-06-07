@@ -315,13 +315,13 @@ const App = () => {
   )
   if (currentView === 'sheet') return (
     <>
-      <SheetPage residentId={residentId} onBack={() => setCurrentView('hub')} />
+      <SheetPage residentId={residentId} onBack={() => setCurrentView('hub')} onNavigate={(v) => setCurrentView(v)} />
       <BottomTabBar />
     </>
   )
   if (currentView === 'care-plan') return (
     <>
-      <CarePlanPage onBack={() => setCurrentView('hub')} />
+      <CarePlanPage onBack={() => setCurrentView('hub')} onNavigate={(v) => setCurrentView(v)} />
       <BottomTabBar />
     </>
   )
@@ -417,23 +417,24 @@ const App = () => {
             </div>
             <p className="text-[11px] font-bold text-slate-600 leading-snug">「{resident.today_wish}」</p>
           </div>
-          <div className="flex flex-col gap-1.5">
-            <div className="flex gap-2">
-              <button
-                onClick={() => setCurrentView('sheet')}
-                className="flex-1 text-[10px] font-bold py-2 px-3 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-1 border"
-                style={{ borderColor: primaryColor, color: primaryColor }}
-              >
-                <i className="fas fa-clock"></i>24Hシート
-              </button>
-              <button
-                onClick={() => setCurrentView('care-plan')}
-                className="flex-1 text-[10px] font-bold py-2 px-3 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-1 bg-slate-100 text-slate-500 hover:bg-slate-200"
-              >
-                <i className="fas fa-file-alt"></i>計画書
-              </button>
-            </div>
-          </div>
+          <nav className="flex gap-1">
+            <button onClick={() => setCurrentView('hub')}
+              className="flex-1 text-[10px] font-bold py-1.5 px-2 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200 transition-all flex items-center justify-center gap-1">
+              <i className="fas fa-home text-[9px]"></i>ホーム
+            </button>
+            <span className="flex-1 text-[10px] font-black py-1.5 px-2 rounded-lg flex items-center justify-center gap-1 text-white"
+              style={{ backgroundColor: primaryColor }}>
+              <i className="fas fa-clipboard-list text-[9px]"></i>記録
+            </span>
+            <button onClick={() => setCurrentView('sheet')}
+              className="flex-1 text-[10px] font-bold py-1.5 px-2 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200 transition-all flex items-center justify-center gap-1">
+              <i className="fas fa-clock text-[9px]"></i>24H
+            </button>
+            <button onClick={() => setCurrentView('care-plan')}
+              className="flex-1 text-[10px] font-bold py-1.5 px-2 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200 transition-all flex items-center justify-center gap-1">
+              <i className="fas fa-file-alt text-[9px]"></i>計画書
+            </button>
+          </nav>
         </div>
         <div className="px-4 lg:px-6 py-2">
           <h3 className="text-xs font-black text-slate-300 uppercase tracking-widest flex items-center gap-2 mb-4">
