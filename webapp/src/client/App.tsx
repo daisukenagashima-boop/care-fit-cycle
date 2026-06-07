@@ -79,10 +79,8 @@ const App = () => {
   const [aiLoading, setAiLoading] = useState(false)
   const [loading, setLoading] = useState(true)
   const [resetting, setResetting] = useState(false)
-  // PC（lg以上）はメイン3カラム、モバイルはハブがデフォルト
-  const [currentView, setCurrentView] = useState<'hub' | 'main' | 'sheet' | 'care-plan' | 'conference'>(
-    () => (typeof window !== 'undefined' && window.innerWidth >= 1024) ? 'main' : 'hub'
-  )
+  // ハブが常にホーム。全画面の戻るはハブに戻る。
+  const [currentView, setCurrentView] = useState<'hub' | 'main' | 'sheet' | 'care-plan' | 'conference'>('hub')
 
   const [showInsightForm, setShowInsightForm] = useState(false)
   const [insightContent, setInsightContent] = useState('')
@@ -311,7 +309,7 @@ const App = () => {
 
   if (currentView === 'hub') return (
     <>
-      <div className="pb-16 lg:pb-0"><HubPage onGoTo={(v) => setCurrentView(v)} /></div>
+      <div className="pb-16 lg:pb-0"><HubPage onGoTo={(v) => setCurrentView(v as any)} /></div>
       <BottomTabBar />
     </>
   )
