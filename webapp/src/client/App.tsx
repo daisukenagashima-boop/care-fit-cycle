@@ -341,38 +341,30 @@ const App = () => {
         className={'flex flex-col z-30 bg-white lg:shadow-xl lg:rounded-r-[40px] lg:border-r border-orange-50 ' + (mobileTab === 'care-plan' ? 'flex-1 overflow-y-auto lg:overflow-hidden lg:w-[22%]' : 'hidden lg:flex lg:w-[22%]')}
         onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}
       >
-        <div className="hidden lg:block p-8 pt-10 pb-6 shrink-0">
-          <div className="flex items-center gap-5 mb-6">
-            <div className="relative">
-              <div className="w-20 h-20 rounded-full bg-orange-100 border-4 border-white shadow-md flex items-center justify-center overflow-hidden">
+        <div className="hidden lg:block px-5 pt-5 pb-3 shrink-0">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="relative shrink-0">
+              <div className="w-14 h-14 rounded-full bg-orange-100 border-2 border-white shadow-md overflow-hidden">
                 <img src="/static/okada-profile.jpg" alt={resident.name} className="w-full h-full object-cover" />
               </div>
-              <div className="absolute -bottom-1 -right-1 bg-red-400 text-white p-1.5 rounded-full shadow-lg">
-                <i className="fas fa-heart text-xs"></i>
+              <div className="absolute -bottom-0.5 -right-0.5 bg-red-400 text-white p-1 rounded-full shadow-lg">
+                <i className="fas fa-heart text-[8px]"></i>
               </div>
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-2xl font-black text-slate-800">{resident.name} 様</h2>
-                <span className="text-xs bg-slate-100 px-2 py-1 rounded-md font-bold text-slate-500">{resident.care_level}</span>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <h2 className="text-base font-black text-slate-800">{resident.name} 様</h2>
+                <span className="text-[10px] bg-slate-100 px-1.5 py-0.5 rounded font-bold text-slate-500">{resident.care_level}</span>
               </div>
-              <p className="text-sm text-slate-400 mt-1 font-medium">「{resident.favorite_things}」</p>
+              <p className="text-[11px] text-slate-400 mt-0.5 font-medium truncate">「{resident.favorite_things}」</p>
             </div>
           </div>
-          <div className="bg-orange-50/50 rounded-2xl p-4 border border-orange-100/50 mb-4">
-            <div className="flex items-center gap-2 text-orange-600 mb-1">
-              <i className="fas fa-sun text-sm"></i>
-              <span className="text-[10px] font-black uppercase tracking-widest">今日のねがい</span>
+          <div className="bg-orange-50/50 rounded-xl px-3 py-2 border border-orange-100/50 mb-3">
+            <div className="flex items-center gap-1.5 text-orange-600 mb-0.5">
+              <i className="fas fa-sun text-[11px]"></i>
+              <span className="text-[9px] font-black uppercase tracking-widest">今日のねがい</span>
             </div>
-            <p className="text-xs font-bold text-slate-600">「{resident.today_wish}」</p>
-          </div>
-          <div className="flex gap-2 mb-2">
-            <a href={`/api/residents/${residentId}/care-plans/export?format=html`} target="_blank" rel="noreferrer" className="flex-1 bg-gradient-to-r from-teal-500 to-[#01C1AF] hover:from-teal-600 hover:to-[#00A89D] text-white text-[10px] font-bold py-2 px-3 rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-1">
-              <i className="fas fa-print"></i>印刷
-            </a>
-            <a href={`/api/residents/${residentId}/care-plans/export?format=csv`} download className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold py-2 px-3 rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1">
-              <i className="fas fa-file-csv"></i>CSV
-            </a>
+            <p className="text-[11px] font-bold text-slate-600 leading-snug">「{resident.today_wish}」</p>
           </div>
           <button
             onClick={() => setCurrentView('sheet')}
@@ -497,7 +489,7 @@ const App = () => {
         onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}
       >
         <div className="p-4 lg:p-8 lg:pb-4">
-          <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 lg:mb-6 flex items-center gap-2">
+          <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
             <i className="fas fa-chart-line" style={{ color: primaryColor }}></i> Care Fit Cycle
             <button
               onClick={handleDemoReset}
@@ -508,22 +500,21 @@ const App = () => {
               {resetting ? '作成中...' : 'デモ用データ作成'}
             </button>
           </h3>
-          <div className="bg-white p-4 lg:p-6 rounded-[24px] lg:rounded-[32px] shadow-sm border border-slate-100">
-            <div className="flex justify-between items-end mb-3">
-              <div>
-                <p className="text-[10px] font-black text-slate-400 leading-none mb-1 uppercase">Progress</p>
-                <p className="text-lg lg:text-xl font-black text-slate-800">Day {resident.maturation_day}</p>
+          <div className="bg-white px-4 py-3 rounded-2xl shadow-sm border border-slate-100">
+            <div className="flex justify-between items-center mb-2">
+              <div className="flex items-baseline gap-2">
+                <p className="text-base font-black text-slate-800">Day {resident.maturation_day}</p>
+                <p className="text-[10px] text-slate-400 font-bold">/ 14</p>
               </div>
-              <span className="text-[10px] font-black text-teal-600 bg-teal-50 px-3 py-1 rounded-full uppercase">
+              <span className="text-[10px] font-black text-teal-600 bg-teal-50 px-2 py-0.5 rounded-full uppercase">
                 {resident.phase === 'initial' ? 'Initial' : resident.phase === 'logging' ? 'Logging' : resident.phase === 'fitting' ? 'Adjustment' : 'Confirmed'}
               </span>
             </div>
-            <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+            <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
               <div className="h-full transition-all duration-1000 ease-out rounded-full" style={{ width: ((resident.maturation_day / 14) * 100) + '%', backgroundColor: primaryColor }}></div>
             </div>
-            <p className="text-[10px] text-slate-400 mt-4 leading-relaxed font-bold">
-              入居から{resident.maturation_day}日が経ちました。<br />
-              実態に合わせた提案が{stickyNotes.length}件届いています。
+            <p className="text-[10px] text-slate-400 mt-2 font-bold">
+              提案が{stickyNotes.length}件届いています。
             </p>
           </div>
         </div>

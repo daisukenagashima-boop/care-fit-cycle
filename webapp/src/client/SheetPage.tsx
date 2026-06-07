@@ -150,6 +150,21 @@ const SheetPage = ({ residentId, onBack }: SheetPageProps) => {
           <p className="text-[10px] text-slate-400">{fitCount}/{carePlans.length} フィット済み ・ 付せん {stickyNotes.length} 件</p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
+          <a
+            href={`/api/residents/${residentId}/care-plans/export?format=html`}
+            target="_blank"
+            rel="noreferrer"
+            className="hidden lg:flex items-center gap-1 text-[10px] font-bold px-2 py-1.5 rounded-lg bg-gradient-to-r from-teal-500 to-[#01C1AF] text-white hover:from-teal-600 hover:to-[#00A89D] transition-all shadow-sm"
+          >
+            <i className="fas fa-print"></i> 印刷
+          </a>
+          <a
+            href={`/api/residents/${residentId}/care-plans/export?format=csv`}
+            download
+            className="hidden lg:flex items-center gap-1 text-[10px] font-bold px-2 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all"
+          >
+            <i className="fas fa-file-csv"></i> CSV
+          </a>
           <button
             onClick={() => setShowMedical(!showMedical)}
             className={`text-[10px] font-bold px-2 py-1.5 rounded-lg transition-all hidden lg:flex items-center gap-1 ${showMedical ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
