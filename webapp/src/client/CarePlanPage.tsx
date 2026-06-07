@@ -391,28 +391,11 @@ const CarePlanPage = ({ onBack, onNavigate }: CarePlanPageProps) => {
   // トップ画面
   if (activeTab === 'top') return (
     <div className="flex flex-col h-screen bg-[#FDFCF9] font-sans">
-      <header className="bg-white border-b border-slate-100 px-4 py-3 flex items-center gap-3 shrink-0 shadow-sm">
-        <button onClick={onBack} className="text-slate-500 hover:text-slate-800 transition-colors flex items-center gap-1.5 text-xs font-bold shrink-0">
-          <i className="fas fa-home text-xs"></i>
-          <span className="hidden lg:inline">ホーム</span>
+      <header className="bg-white border-b border-slate-100 px-4 py-3 flex items-center gap-3 shrink-0">
+        <button onClick={onBack} className="lg:hidden text-slate-400 hover:text-slate-600 flex items-center gap-1.5 text-sm font-bold shrink-0">
+          <i className="fas fa-arrow-left text-xs"></i>
         </button>
-        {onNavigate && (
-          <nav className="hidden lg:flex items-center gap-1 ml-1">
-            <div className="w-px h-4 bg-slate-200 mr-1"></div>
-            <button onClick={() => onNavigate('main')}
-              className="text-xs font-bold px-2.5 py-1 rounded-lg text-slate-500 hover:bg-slate-100 transition-colors">
-              記録
-            </button>
-            <button onClick={() => onNavigate('sheet')}
-              className="text-xs font-bold px-2.5 py-1 rounded-lg text-slate-500 hover:bg-slate-100 transition-colors">
-              24Hシート
-            </button>
-            <span className="text-xs font-black px-2.5 py-1 rounded-lg text-white" style={{ backgroundColor: primaryColor }}>
-              計画書
-            </span>
-          </nav>
-        )}
-        <div className="w-px h-5 bg-slate-200"></div>
+        <div className="w-px h-5 bg-slate-200 lg:hidden"></div>
         <h1 className="font-black text-slate-800 text-base flex items-center gap-2">
           <i className="fas fa-file-alt" style={{ color: primaryColor }}></i>
           施設サービス計画書

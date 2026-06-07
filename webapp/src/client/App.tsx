@@ -284,15 +284,40 @@ const App = () => {
     )
   }
 
-  // モバイル用ボトムタブバー（conference以外で表示）
+  const NAV_ITEMS = [
+    { id: 'hub', icon: 'fa-home', label: 'ホーム' },
+    { id: 'main', icon: 'fa-clipboard-list', label: '記録' },
+    { id: 'sheet', icon: 'fa-clock', label: '24Hシート' },
+    { id: 'care-plan', icon: 'fa-file-alt', label: '計画書' },
+  ]
+
+  // PC固定ヘッダー（全ページ共通）
+  const PCHeader = () => (
+    <div className="hidden lg:flex bg-white border-b border-slate-100 px-6 py-2 items-center gap-1 shrink-0 z-40">
+      <span className="text-sm font-black mr-4" style={{ color: primaryColor }}>
+        <i className="fas fa-heart mr-1"></i>Care Fit Cycle
+      </span>
+      {NAV_ITEMS.map(item => {
+        const active = currentView === item.id
+        return (
+          <button
+            key={item.id}
+            onClick={() => setCurrentView(item.id as any)}
+            className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg transition-all ${active ? 'text-white' : 'text-slate-500 hover:bg-slate-100'}`}
+            style={active ? { backgroundColor: primaryColor } : {}}
+          >
+            <i className={`fas ${item.icon} text-[10px]`}></i>
+            {item.label}
+          </button>
+        )
+      })}
+    </div>
+  )
+
+  // モバイル用ボトムタブバー
   const BottomTabBar = () => (
     <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 flex z-50">
-      {[
-        { id: 'hub', icon: 'fa-home', label: 'ホーム' },
-        { id: 'main', icon: 'fa-clipboard-list', label: '記録' },
-        { id: 'sheet', icon: 'fa-clock', label: '24Hシート' },
-        { id: 'care-plan', icon: 'fa-file-alt', label: '計画書' },
-      ].map(tab => (
+      {NAV_ITEMS.map(tab => (
         <button
           key={tab.id}
           onClick={() => setCurrentView(tab.id as any)}
@@ -305,23 +330,31 @@ const App = () => {
     </div>
   )
 
-  if (currentView === 'conference') return <ConferencePage onBack={() => setCurrentView('hub')} onComplete={() => setCurrentView('care-plan')} />
+  if (currentView === 'conference') return (
+    <>
+      <PCHeader />
+      <ConferencePage onBack={() => setCurrentView('hub')} onComplete={() => setCurrentView('care-plan')} />
+    </>
+  )
 
   if (currentView === 'hub') return (
     <>
+      <PCHeader />
       <div className="pb-16 lg:pb-0"><HubPage onGoTo={(v) => setCurrentView(v as any)} /></div>
       <BottomTabBar />
     </>
   )
   if (currentView === 'sheet') return (
     <>
-      <SheetPage residentId={residentId} onBack={() => setCurrentView('hub')} onNavigate={(v) => setCurrentView(v)} />
+      <PCHeader />
+      <SheetPage residentId={residentId} onBack={() => setCurrentView('hub')} />
       <BottomTabBar />
     </>
   )
   if (currentView === 'care-plan') return (
     <>
-      <CarePlanPage onBack={() => setCurrentView('hub')} onNavigate={(v) => setCurrentView(v)} />
+      <PCHeader />
+      <CarePlanPage onBack={() => setCurrentView('hub')} />
       <BottomTabBar />
     </>
   )
@@ -336,6 +369,7 @@ const App = () => {
 
   return (
     <>
+    <PCHeader />
     <BottomTabBar />
     <div className="flex flex-col lg:flex-row bg-[#FDFCF9] font-sans text-slate-800 overflow-hidden" style={{ height: 'calc(100dvh - 0px)' }}
       // モバイルではボトムタブ(60px)分を差し引く
@@ -417,24 +451,13 @@ const App = () => {
             </div>
             <p className="text-[11px] font-bold text-slate-600 leading-snug">「{resident.today_wish}」</p>
           </div>
-          <nav className="flex gap-1">
-            <button onClick={() => setCurrentView('hub')}
-              className="flex-1 text-[10px] font-bold py-1.5 px-2 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200 transition-all flex items-center justify-center gap-1">
-              <i className="fas fa-home text-[9px]"></i>ホーム
-            </button>
-            <span className="flex-1 text-[10px] font-black py-1.5 px-2 rounded-lg flex items-center justify-center gap-1 text-white"
-              style={{ backgroundColor: primaryColor }}>
-              <i className="fas fa-clipboard-list text-[9px]"></i>記録
-            </span>
-            <button onClick={() => setCurrentView('sheet')}
-              className="flex-1 text-[10px] font-bold py-1.5 px-2 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200 transition-all flex items-center justify-center gap-1">
-              <i className="fas fa-clock text-[9px]"></i>24H
-            </button>
-            <button onClick={() => setCurrentView('care-plan')}
-              className="flex-1 text-[10px] font-bold py-1.5 px-2 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200 transition-all flex items-center justify-center gap-1">
-              <i className="fas fa-file-alt text-[9px]"></i>計画書
-            </button>
-          </nav>
+          <button
+            onClick={() => setCurrentView('sheet')}
+            className="w-full text-[10px] font-bold py-2 px-3 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-1 border"
+            style={{ borderColor: primaryColor, color: primaryColor }}
+          >
+            <i className="fas fa-clock"></i>24Hシートを管理
+          </button>
         </div>
         <div className="px-4 lg:px-6 py-2">
           <h3 className="text-xs font-black text-slate-300 uppercase tracking-widest flex items-center gap-2 mb-4">
