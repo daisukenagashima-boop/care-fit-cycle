@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import SheetPage from './SheetPage'
 import HubPage from './HubPage'
+import CarePlanPage from './CarePlanPage'
 
 // ============================================
 // Types
@@ -283,12 +284,7 @@ const App = () => {
 
   if (currentView === 'hub') return <HubPage onGoTo={(v) => setCurrentView(v)} />
   if (currentView === 'sheet') return <SheetPage residentId={residentId} onBack={() => setCurrentView('hub')} />
-  if (currentView === 'care-plan') return (
-    <div className="flex items-center justify-center h-screen bg-[#FDFCF9] flex-col gap-4">
-      <p className="text-slate-400 font-bold">施設サービス計画書（準備中）</p>
-      <button onClick={() => setCurrentView('hub')} className="text-sm font-bold text-[#01C1AF]">← ホームに戻る</button>
-    </div>
-  )
+  if (currentView === 'care-plan') return <CarePlanPage onBack={() => setCurrentView('hub')} />
 
   const stickyNotesByTime: Record<string, StickyNote[]> = {}
   stickyNotes.forEach(note => {

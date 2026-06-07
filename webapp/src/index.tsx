@@ -174,6 +174,52 @@ app.get('/api/staff', async (c) => {
   return c.json(results)
 })
 
+// ============================================
+// 施設サービス計画書 第1表
+// ============================================
+
+app.get('/api/care-plan/table1/:residentId', async (c) => {
+  const id = c.req.param('residentId')
+  const result = await c.env.DB.prepare(
+    'SELECT * FROM care_plan_table1 WHERE resident_id = ?'
+  ).bind(id).first()
+  if (!result) return c.json(null, 404)
+  return c.json(result)
+})
+
+app.post('/api/care-plan/table1/:residentId', async (c) => {
+  const id = c.req.param('residentId')
+  const body = await c.req.json()
+  const existing = await c.env.DB.prepare(
+    'SELECT id FROM care_plan_table1 WHERE resident_id = ?'
+  ).bind(id).first()
+  if (existing) {
+    await c.env.DB.prepare(`
+      UPDATE care_plan_table1
+      SET cm_name=?, facility_name=?, created_date=?, revised_date=?,
+          certification_status=?, valid_period_from=?, valid_period_to=?,
+          entry_background=?, resident_wishes=?, family_wishes=?,
+          comprehensive_policy=?, updated_at=CURRENT_TIMESTAMP
+      WHERE resident_id=?`)
+      .bind(body.cm_name, body.facility_name, body.created_date, body.revised_date,
+        body.certification_status, body.valid_period_from, body.valid_period_to,
+        body.entry_background, body.resident_wishes, body.family_wishes,
+        body.comprehensive_policy, id).run()
+  } else {
+    await c.env.DB.prepare(`
+      INSERT INTO care_plan_table1
+        (resident_id, cm_name, facility_name, created_date, revised_date,
+         certification_status, valid_period_from, valid_period_to,
+         entry_background, resident_wishes, family_wishes, comprehensive_policy)
+      VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`)
+      .bind(id, body.cm_name, body.facility_name, body.created_date, body.revised_date,
+        body.certification_status, body.valid_period_from, body.valid_period_to,
+        body.entry_background, body.resident_wishes, body.family_wishes,
+        body.comprehensive_policy).run()
+  }
+  return c.json({ success: true })
+})
+
 // AI相談窓口
 app.post('/api/ai-chat', async (c) => {
   try {
