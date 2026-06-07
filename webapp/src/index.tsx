@@ -220,6 +220,95 @@ app.post('/api/care-plan/table1/:residentId', async (c) => {
   return c.json({ success: true })
 })
 
+// ============================================
+// 施設サービス計画書 第2表: 課題・目標・援助内容
+// ============================================
+
+// 課題一覧取得（援助内容含む）
+app.get('/api/care-plan/goals/:residentId', async (c) => {
+  const id = c.req.param('residentId')
+  const { results: goals } = await c.env.DB.prepare(
+    'SELECT * FROM care_goals WHERE resident_id=? ORDER BY sort_order ASC'
+  ).bind(id).all()
+  const { results: services } = await c.env.DB.prepare(
+    'SELECT * FROM care_goal_services WHERE care_goal_id IN (SELECT id FROM care_goals WHERE resident_id=?) ORDER BY sort_order ASC'
+  ).bind(id).all()
+  const goalsWithServices = goals.map((g: any) => ({
+    ...g,
+    services: services.filter((s: any) => s.care_goal_id === g.id),
+  }))
+  return c.json(goalsWithServices)
+})
+
+// 課題追加
+app.post('/api/care-plan/goals/:residentId', async (c) => {
+  const id = c.req.param('residentId')
+  const body = await c.req.json()
+  const maxRow = await c.env.DB.prepare(
+    'SELECT MAX(sort_order) as m FROM care_goals WHERE resident_id=?'
+  ).bind(id).first() as any
+  const result = await c.env.DB.prepare(`
+    INSERT INTO care_goals (resident_id, sort_order, needs, long_term_goal, long_term_from, long_term_to, short_term_goal, short_term_from, short_term_to)
+    VALUES (?,?,?,?,?,?,?,?,?)`)
+    .bind(id, (maxRow?.m ?? 0) + 1, body.needs ?? '', body.long_term_goal ?? '',
+      body.long_term_from ?? '', body.long_term_to ?? '', body.short_term_goal ?? '',
+      body.short_term_from ?? '', body.short_term_to ?? '').run()
+  return c.json({ success: true, id: result.meta.last_row_id })
+})
+
+// 課題更新
+app.put('/api/care-plan/goals/:goalId', async (c) => {
+  const id = c.req.param('goalId')
+  const body = await c.req.json()
+  await c.env.DB.prepare(`
+    UPDATE care_goals SET needs=?, long_term_goal=?, long_term_from=?, long_term_to=?,
+    short_term_goal=?, short_term_from=?, short_term_to=?, updated_at=CURRENT_TIMESTAMP
+    WHERE id=?`)
+    .bind(body.needs, body.long_term_goal, body.long_term_from, body.long_term_to,
+      body.short_term_goal, body.short_term_from, body.short_term_to, id).run()
+  return c.json({ success: true })
+})
+
+// 課題削除
+app.delete('/api/care-plan/goals/:goalId', async (c) => {
+  const id = c.req.param('goalId')
+  await c.env.DB.prepare('DELETE FROM care_goal_services WHERE care_goal_id=?').bind(id).run()
+  await c.env.DB.prepare('DELETE FROM care_goals WHERE id=?').bind(id).run()
+  return c.json({ success: true })
+})
+
+// 援助内容追加
+app.post('/api/care-plan/goals/:goalId/services', async (c) => {
+  const goalId = c.req.param('goalId')
+  const body = await c.req.json()
+  const maxRow = await c.env.DB.prepare(
+    'SELECT MAX(sort_order) as m FROM care_goal_services WHERE care_goal_id=?'
+  ).bind(goalId).first() as any
+  const result = await c.env.DB.prepare(`
+    INSERT INTO care_goal_services (care_goal_id, service_content, service_type, person, frequency, period_from, period_to, sort_order)
+    VALUES (?,?,?,?,?,?,?,?)`)
+    .bind(goalId, body.service_content ?? '', body.service_type ?? '', body.person ?? '',
+      body.frequency ?? '', body.period_from ?? '', body.period_to ?? '', (maxRow?.m ?? 0) + 1).run()
+  return c.json({ success: true, id: result.meta.last_row_id })
+})
+
+// 援助内容更新
+app.put('/api/care-plan/services/:serviceId', async (c) => {
+  const id = c.req.param('serviceId')
+  const body = await c.req.json()
+  await c.env.DB.prepare(`
+    UPDATE care_goal_services SET service_content=?, service_type=?, person=?, frequency=?, period_from=?, period_to=? WHERE id=?`)
+    .bind(body.service_content, body.service_type, body.person, body.frequency, body.period_from, body.period_to, id).run()
+  return c.json({ success: true })
+})
+
+// 援助内容削除
+app.delete('/api/care-plan/services/:serviceId', async (c) => {
+  const id = c.req.param('serviceId')
+  await c.env.DB.prepare('DELETE FROM care_goal_services WHERE id=?').bind(id).run()
+  return c.json({ success: true })
+})
+
 // AI相談窓口
 app.post('/api/ai-chat', async (c) => {
   try {
