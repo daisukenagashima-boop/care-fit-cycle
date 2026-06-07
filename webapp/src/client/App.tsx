@@ -63,6 +63,46 @@ const primaryColor = '#01C1AF'
 const residentId = 1
 
 // ============================================
+// Navigation (App外で定義 → 毎レンダーでunmount/remountしない)
+// ============================================
+
+const NAV_ITEMS = [
+  { id: 'hub', icon: 'fa-home', label: 'ホーム' },
+  { id: 'main', icon: 'fa-clipboard-list', label: '記録' },
+  { id: 'sheet', icon: 'fa-clock', label: '24Hシート' },
+  { id: 'care-plan', icon: 'fa-file-alt', label: '計画書' },
+]
+
+const PCHeader = ({ currentView, onNavigate }: { currentView: string; onNavigate: (v: string) => void }) => (
+  <div className="hidden lg:flex bg-white border-b border-slate-100 px-6 py-2 items-center gap-1 shrink-0 z-40">
+    <span className="text-sm font-black mr-4" style={{ color: primaryColor }}>Care Fit Cycle</span>
+    {NAV_ITEMS.map(item => {
+      const active = currentView === item.id
+      return (
+        <button key={item.id} onClick={() => onNavigate(item.id)}
+          className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg transition-all ${active ? 'text-white' : 'text-slate-500 hover:bg-slate-100'}`}
+          style={active ? { backgroundColor: primaryColor } : {}}>
+          <i className={`fas ${item.icon} text-[10px]`}></i>
+          {item.label}
+        </button>
+      )
+    })}
+  </div>
+)
+
+const BottomTabBar = ({ currentView, onNavigate }: { currentView: string; onNavigate: (v: string) => void }) => (
+  <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 flex z-50">
+    {NAV_ITEMS.map(tab => (
+      <button key={tab.id} onClick={() => onNavigate(tab.id)}
+        className={`flex-1 py-3 flex flex-col items-center gap-0.5 transition-colors ${currentView === tab.id ? 'text-[#01C1AF]' : 'text-slate-400'}`}>
+        <i className={`fas ${tab.icon} text-lg`}></i>
+        <span className="text-[9px] font-bold">{tab.label}</span>
+      </button>
+    ))}
+  </div>
+)
+
+// ============================================
 // App Component
 // ============================================
 
@@ -284,93 +324,42 @@ const App = () => {
     )
   }
 
-  const NAV_ITEMS = [
-    { id: 'hub', icon: 'fa-home', label: 'ホーム' },
-    { id: 'main', icon: 'fa-clipboard-list', label: '記録' },
-    { id: 'sheet', icon: 'fa-clock', label: '24Hシート' },
-    { id: 'care-plan', icon: 'fa-file-alt', label: '計画書' },
-  ]
-
-  // PC固定ヘッダー（全ページ共通）
-  const PCHeader = () => (
-    <div className="hidden lg:flex bg-white border-b border-slate-100 px-6 py-2 items-center gap-1 shrink-0 z-40">
-      <span className="text-sm font-black mr-4" style={{ color: primaryColor }}>
-        <i className="fas fa-heart mr-1"></i>Care Fit Cycle
-      </span>
-      {NAV_ITEMS.map(item => {
-        const active = currentView === item.id
-        return (
-          <button
-            key={item.id}
-            onClick={() => setCurrentView(item.id as any)}
-            className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg transition-all ${active ? 'text-white' : 'text-slate-500 hover:bg-slate-100'}`}
-            style={active ? { backgroundColor: primaryColor } : {}}
-          >
-            <i className={`fas ${item.icon} text-[10px]`}></i>
-            {item.label}
-          </button>
-        )
-      })}
-    </div>
-  )
-
-  // モバイル用ボトムタブバー
-  const BottomTabBar = () => (
-    <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 flex z-50">
-      {NAV_ITEMS.map(tab => (
-        <button
-          key={tab.id}
-          onClick={() => setCurrentView(tab.id as any)}
-          className={`flex-1 py-3 flex flex-col items-center gap-0.5 transition-colors ${currentView === tab.id ? 'text-[#01C1AF]' : 'text-slate-400'}`}
-        >
-          <i className={`fas ${tab.icon} text-lg`}></i>
-          <span className="text-[9px] font-bold">{tab.label}</span>
-        </button>
-      ))}
-    </div>
-  )
+  const nav = (v: string) => setCurrentView(v as any)
 
   if (currentView === 'conference') return (
     <>
-      <PCHeader />
+      <PCHeader currentView={currentView} onNavigate={nav} />
       <ConferencePage onBack={() => setCurrentView('hub')} onComplete={() => setCurrentView('care-plan')} />
     </>
   )
 
   if (currentView === 'hub') return (
     <>
-      <PCHeader />
+      <PCHeader currentView={currentView} onNavigate={nav} />
       <div className="pb-16 lg:pb-0"><HubPage onGoTo={(v) => setCurrentView(v as any)} /></div>
-      <BottomTabBar />
+      <BottomTabBar currentView={currentView} onNavigate={nav} />
     </>
   )
   if (currentView === 'sheet') return (
     <>
-      <PCHeader />
+      <PCHeader currentView={currentView} onNavigate={nav} />
       <SheetPage residentId={residentId} onBack={() => setCurrentView('hub')} />
-      <BottomTabBar />
+      <BottomTabBar currentView={currentView} onNavigate={nav} />
     </>
   )
   if (currentView === 'care-plan') return (
     <>
-      <PCHeader />
+      <PCHeader currentView={currentView} onNavigate={nav} />
       <CarePlanPage onBack={() => setCurrentView('hub')} />
-      <BottomTabBar />
+      <BottomTabBar currentView={currentView} onNavigate={nav} />
     </>
   )
 
-  const stickyNotesByTime: Record<string, StickyNote[]> = {}
-  stickyNotes.forEach(note => {
-    if (note.time) {
-      if (!stickyNotesByTime[note.time]) stickyNotesByTime[note.time] = []
-      stickyNotesByTime[note.time].push(note)
-    }
-  })
 
   return (
     <>
-    <PCHeader />
-    <BottomTabBar />
+    <PCHeader currentView={currentView} onNavigate={nav} />
+    <BottomTabBar currentView={currentView} onNavigate={nav} />
     <div className="flex flex-col lg:flex-row bg-[#FDFCF9] font-sans text-slate-800 overflow-hidden" style={{ height: 'calc(100dvh - 0px)' }}
       // モバイルではボトムタブ(60px)分を差し引く
     >
@@ -381,13 +370,8 @@ const App = () => {
           <button onClick={() => setCurrentView('hub')} className="text-slate-400 hover:text-slate-600 transition-colors mr-1">
             <i className="fas fa-arrow-left text-sm"></i>
           </button>
-          <div className="relative">
-            <div className="w-12 h-12 rounded-full bg-orange-100 border-2 border-white shadow-md flex items-center justify-center overflow-hidden">
-              <img src="/static/okada-profile.jpg" alt={resident.name} className="w-full h-full object-cover" />
-            </div>
-            <div className="absolute -bottom-0.5 -right-0.5 bg-red-400 text-white p-1 rounded-full shadow-lg">
-              <i className="fas fa-heart text-[8px]"></i>
-            </div>
+          <div className="w-12 h-12 rounded-full bg-orange-100 border-2 border-white shadow-md overflow-hidden">
+            <img src="/static/okada-profile.jpg" alt={resident.name} className="w-full h-full object-cover" />
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2">
@@ -431,9 +415,6 @@ const App = () => {
             <div className="relative shrink-0">
               <div className="w-14 h-14 rounded-full bg-orange-100 border-2 border-white shadow-md overflow-hidden">
                 <img src="/static/okada-profile.jpg" alt={resident.name} className="w-full h-full object-cover" />
-              </div>
-              <div className="absolute -bottom-0.5 -right-0.5 bg-red-400 text-white p-1 rounded-full shadow-lg">
-                <i className="fas fa-heart text-[8px]"></i>
               </div>
             </div>
             <div className="min-w-0">

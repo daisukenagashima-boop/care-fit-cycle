@@ -142,7 +142,12 @@ const CarePlanPage = ({ onBack, onNavigate }: CarePlanPageProps) => {
       await fetchGoals()
       setEditingGoal(null)
       setSaved(true); setTimeout(() => setSaved(false), 2000)
-    } finally { setSaving(false) }
+    } catch (e) {
+      console.error('課題の保存に失敗しました', e)
+      alert('保存に失敗しました。通信状況を確認してください。')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const handleDeleteGoal = async (goalId: number) => {
