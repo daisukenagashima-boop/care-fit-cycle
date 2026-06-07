@@ -285,25 +285,8 @@ const HubPage = ({ onGoTo }: HubPageProps) => {
             </button>
           </div>
 
-          {/* 施設サービス計画書 */}
-          <button
-            onClick={() => onGoTo('care-plan')}
-            className="w-full bg-white rounded-2xl shadow-sm px-4 py-3.5 flex items-center gap-3 active:scale-[0.98] transition-all text-left"
-          >
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: `${primaryColor}15` }}>
-              <i className="fas fa-file-alt text-sm" style={{ color: primaryColor }}></i>
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-black text-slate-800">施設サービス計画書</p>
-              <p className="text-[11px] text-slate-400">第1表 ・ 第2表 ・ 第3表</p>
-            </div>
-            <i className="fas fa-chevron-right text-slate-200 text-xs"></i>
-          </button>
-
           {/* 将来: 複数利用者対応時の展開エリア */}
           {/* <ResidentSwitcher residents={residents} onSelect={setResidentId} /> */}
-
-          <p className="text-center text-[10px] text-slate-300 pb-2">ケア・フィット・サイクル</p>
         </div>
       </div>
     </div>

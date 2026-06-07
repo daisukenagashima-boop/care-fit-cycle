@@ -79,7 +79,10 @@ const App = () => {
   const [aiLoading, setAiLoading] = useState(false)
   const [loading, setLoading] = useState(true)
   const [resetting, setResetting] = useState(false)
-  const [currentView, setCurrentView] = useState<'hub' | 'main' | 'sheet' | 'care-plan' | 'conference'>('hub')
+  // PC（lg以上）はメイン3カラム、モバイルはハブがデフォルト
+  const [currentView, setCurrentView] = useState<'hub' | 'main' | 'sheet' | 'care-plan' | 'conference'>(
+    () => (typeof window !== 'undefined' && window.innerWidth >= 1024) ? 'main' : 'hub'
+  )
 
   const [showInsightForm, setShowInsightForm] = useState(false)
   const [insightContent, setInsightContent] = useState('')
@@ -283,10 +286,47 @@ const App = () => {
     )
   }
 
-  if (currentView === 'hub') return <HubPage onGoTo={(v) => setCurrentView(v)} />
-  if (currentView === 'sheet') return <SheetPage residentId={residentId} onBack={() => setCurrentView('hub')} />
-  if (currentView === 'care-plan') return <CarePlanPage onBack={() => setCurrentView('hub')} />
+  // モバイル用ボトムタブバー（conference以外で表示）
+  const BottomTabBar = () => (
+    <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 flex z-50">
+      {[
+        { id: 'hub', icon: 'fa-home', label: 'ホーム' },
+        { id: 'main', icon: 'fa-clipboard-list', label: '記録' },
+        { id: 'sheet', icon: 'fa-clock', label: '24Hシート' },
+        { id: 'care-plan', icon: 'fa-file-alt', label: '計画書' },
+      ].map(tab => (
+        <button
+          key={tab.id}
+          onClick={() => setCurrentView(tab.id as any)}
+          className={`flex-1 py-3 flex flex-col items-center gap-0.5 transition-colors ${currentView === tab.id ? 'text-[#01C1AF]' : 'text-slate-400'}`}
+        >
+          <i className={`fas ${tab.icon} text-lg`}></i>
+          <span className="text-[9px] font-bold">{tab.label}</span>
+        </button>
+      ))}
+    </div>
+  )
+
   if (currentView === 'conference') return <ConferencePage onBack={() => setCurrentView('hub')} onComplete={() => setCurrentView('care-plan')} />
+
+  if (currentView === 'hub') return (
+    <>
+      <div className="pb-16 lg:pb-0"><HubPage onGoTo={(v) => setCurrentView(v)} /></div>
+      <BottomTabBar />
+    </>
+  )
+  if (currentView === 'sheet') return (
+    <>
+      <SheetPage residentId={residentId} onBack={() => setCurrentView('hub')} />
+      <BottomTabBar />
+    </>
+  )
+  if (currentView === 'care-plan') return (
+    <>
+      <CarePlanPage onBack={() => setCurrentView('hub')} />
+      <BottomTabBar />
+    </>
+  )
 
   const stickyNotesByTime: Record<string, StickyNote[]> = {}
   stickyNotes.forEach(note => {
@@ -297,7 +337,11 @@ const App = () => {
   })
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen bg-[#FDFCF9] font-sans text-slate-800 overflow-hidden lg:overflow-hidden">
+    <>
+    <BottomTabBar />
+    <div className="flex flex-col lg:flex-row bg-[#FDFCF9] font-sans text-slate-800 overflow-hidden" style={{ height: 'calc(100dvh - 0px)' }}
+      // モバイルではボトムタブ(60px)分を差し引く
+    >
 
       {/* モバイル用ヘッダー */}
       <div className="lg:hidden bg-white border-b border-slate-200 p-4 shrink-0">
@@ -375,20 +419,22 @@ const App = () => {
             </div>
             <p className="text-[11px] font-bold text-slate-600 leading-snug">「{resident.today_wish}」</p>
           </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setCurrentView('hub')}
-              className="flex-1 text-[10px] font-bold py-2 px-3 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-1 bg-slate-100 text-slate-500 hover:bg-slate-200"
-            >
-              <i className="fas fa-home"></i>ホーム
-            </button>
-            <button
-              onClick={() => setCurrentView('sheet')}
-              className="flex-1 text-[10px] font-bold py-2 px-3 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-1 border"
-              style={{ borderColor: primaryColor, color: primaryColor }}
-            >
-              <i className="fas fa-table"></i>24Hシート
-            </button>
+          <div className="flex flex-col gap-1.5">
+            <div className="flex gap-2">
+              <button
+                onClick={() => setCurrentView('sheet')}
+                className="flex-1 text-[10px] font-bold py-2 px-3 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-1 border"
+                style={{ borderColor: primaryColor, color: primaryColor }}
+              >
+                <i className="fas fa-clock"></i>24Hシート
+              </button>
+              <button
+                onClick={() => setCurrentView('care-plan')}
+                className="flex-1 text-[10px] font-bold py-2 px-3 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-1 bg-slate-100 text-slate-500 hover:bg-slate-200"
+              >
+                <i className="fas fa-file-alt"></i>計画書
+              </button>
+            </div>
           </div>
         </div>
         <div className="px-4 lg:px-6 py-2">
@@ -477,7 +523,7 @@ const App = () => {
           )}
         </div>
 
-        <div className="p-4 lg:p-8 lg:pt-0">
+        <div className="p-4 lg:p-8 lg:pt-0 pb-20 lg:pb-8">
           <div className="mb-2">
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">📌 タグを選んで記録</p>
             <div className="flex gap-2 flex-wrap">
@@ -662,6 +708,7 @@ const App = () => {
         </div>
       </div>
     </div>
+    </>
   )
 }
 
