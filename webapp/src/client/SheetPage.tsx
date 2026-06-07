@@ -21,6 +21,13 @@ interface CarePlanDetail {
   status: string
   display_order: number
   updated_at: string
+  care_goal_id: number | null
+}
+
+interface GoalOption {
+  id: number
+  sort_order: number
+  needs: string
 }
 
 interface StickyNote {
@@ -58,16 +65,19 @@ const SheetPage = ({ residentId, onBack }: SheetPageProps) => {
   const [showMedical, setShowMedical] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [goals, setGoals] = useState<GoalOption[]>([])
 
   useEffect(() => { fetchData() }, [])
 
   const fetchData = async () => {
     try {
-      const [residentRes, plansRes, notesRes] = await Promise.all([
+      const [residentRes, plansRes, notesRes, goalsRes] = await Promise.all([
         axios.get(`/api/residents/${residentId}`),
         axios.get(`/api/residents/${residentId}/care-plans`),
         axios.get(`/api/residents/${residentId}/sticky-notes?status=pending`),
+        axios.get(`/api/care-plan/goals/${residentId}`).catch(() => ({ data: [] })),
       ])
+      setGoals(goalsRes.data)
       setResident(residentRes.data)
       setCarePlans(plansRes.data)
       setStickyNotes(notesRes.data)
@@ -306,6 +316,23 @@ const SheetPage = ({ residentId, onBack }: SheetPageProps) => {
                     className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01C1AF]/30" />
                 </div>
               </div>
+
+              {/* Goal Link */}
+              {goals.length > 0 && (
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase block mb-1">🎯 ケアプランの課題に紐づける</label>
+                  <select
+                    value={formData.care_goal_id ?? ''}
+                    onChange={e => setFormData(p => ({ ...p, care_goal_id: e.target.value ? Number(e.target.value) : null }))}
+                    className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01C1AF]/30"
+                  >
+                    <option value="">紐づけなし</option>
+                    {goals.map((g, i) => (
+                      <option key={g.id} value={g.id}>課題{i + 1}: {g.needs ? g.needs.slice(0, 25) + '...' : '（未入力）'}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               {/* Status */}
               <div>

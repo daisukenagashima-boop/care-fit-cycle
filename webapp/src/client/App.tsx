@@ -3,6 +3,7 @@ import axios from 'axios'
 import SheetPage from './SheetPage'
 import HubPage from './HubPage'
 import CarePlanPage from './CarePlanPage'
+import ConferencePage from './ConferencePage'
 
 // ============================================
 // Types
@@ -78,7 +79,7 @@ const App = () => {
   const [aiLoading, setAiLoading] = useState(false)
   const [loading, setLoading] = useState(true)
   const [resetting, setResetting] = useState(false)
-  const [currentView, setCurrentView] = useState<'hub' | 'main' | 'sheet' | 'care-plan'>('hub')
+  const [currentView, setCurrentView] = useState<'hub' | 'main' | 'sheet' | 'care-plan' | 'conference'>('hub')
 
   const [showInsightForm, setShowInsightForm] = useState(false)
   const [insightContent, setInsightContent] = useState('')
@@ -285,6 +286,7 @@ const App = () => {
   if (currentView === 'hub') return <HubPage onGoTo={(v) => setCurrentView(v)} />
   if (currentView === 'sheet') return <SheetPage residentId={residentId} onBack={() => setCurrentView('hub')} />
   if (currentView === 'care-plan') return <CarePlanPage onBack={() => setCurrentView('hub')} />
+  if (currentView === 'conference') return <ConferencePage onBack={() => setCurrentView('hub')} onComplete={() => setCurrentView('care-plan')} />
 
   const stickyNotesByTime: Record<string, StickyNote[]> = {}
   stickyNotes.forEach(note => {

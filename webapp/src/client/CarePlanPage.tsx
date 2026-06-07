@@ -75,10 +75,11 @@ const CarePlanPage = ({ onBack }: CarePlanPageProps) => {
   const [table1, setTable1] = useState<Table1Data>(EMPTY_TABLE1)
   const [goals, setGoals] = useState<Goal[]>([])
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null)
+  const [weeklyData, setWeeklyData] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
-  const [activeTab, setActiveTab] = useState<'top' | 'table1' | 'table2'>('top')
+  const [activeTab, setActiveTab] = useState<'top' | 'table1' | 'table2' | 'table3'>('top')
 
   useEffect(() => { fetchData() }, [])
 
@@ -92,6 +93,8 @@ const CarePlanPage = ({ onBack }: CarePlanPageProps) => {
       if (table1Res.data) setTable1(table1Res.data)
       const goalsRes = await axios.get(`/api/care-plan/goals/${residentId}`).catch(() => ({ data: [] }))
       setGoals(goalsRes.data)
+      const weeklyRes = await axios.get(`/api/care-plan/table3/${residentId}`).catch(() => ({ data: [] }))
+      setWeeklyData(weeklyRes.data)
     } catch (e) {
       console.error(e)
     } finally {
@@ -153,6 +156,66 @@ const CarePlanPage = ({ onBack }: CarePlanPageProps) => {
       <div className="animate-spin rounded-full h-10 w-10 border-b-2" style={{ borderColor: primaryColor }}></div>
     </div>
   )
+
+  // 第3表画面
+  if (activeTab === 'table3') {
+    const DAYS = ['月', '火', '水', '木', '金', '土', '日']
+    const slots = [...new Set(weeklyData.map((w: any) => w.time_slot))].sort()
+    return (
+      <div className="flex flex-col h-screen bg-[#FDFCF9] font-sans">
+        <header className="bg-white border-b border-slate-100 px-4 py-4 flex items-center gap-3 shrink-0 shadow-sm">
+          <button onClick={() => setActiveTab('top')} className="text-slate-400 hover:text-slate-600 flex items-center gap-1.5 text-sm font-bold">
+            <i className="fas fa-arrow-left"></i>
+            <span className="hidden lg:inline">計画書</span>
+          </button>
+          <div className="w-px h-5 bg-slate-200"></div>
+          <h1 className="font-black text-slate-800 text-base flex-1">第3表　週間サービス計画表</h1>
+          <a href={`/api/care-plan/export/${residentId}`} target="_blank" rel="noreferrer"
+            className="text-[10px] font-bold px-3 py-1.5 rounded-lg text-white flex items-center gap-1 shrink-0"
+            style={{ backgroundColor: primaryColor }}>
+            <i className="fas fa-print"></i> 印刷
+          </a>
+        </header>
+        <div className="flex-1 overflow-auto p-4">
+          {slots.length === 0 ? (
+            <div className="text-center py-16 text-slate-400">
+              <i className="fas fa-calendar-week text-4xl mb-4"></i>
+              <p className="font-bold text-sm">まだ生成されていません</p>
+              <p className="text-xs mt-1">Day14カンファレンスで自動生成されます</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="border-collapse text-xs min-w-[600px] w-full">
+                <thead>
+                  <tr className="bg-slate-50">
+                    <th className="border border-slate-200 px-3 py-2 text-left font-black text-slate-600 w-16">時間</th>
+                    {DAYS.map(d => (
+                      <th key={d} className="border border-slate-200 px-2 py-2 text-center font-black text-slate-600">{d}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {slots.map(slot => (
+                    <tr key={slot} className="hover:bg-slate-50">
+                      <td className="border border-slate-200 px-3 py-2 font-black text-center" style={{ color: primaryColor }}>{slot}</td>
+                      {DAYS.map(day => {
+                        const cell = weeklyData.find((w: any) => w.time_slot === slot && w.day_of_week === day)
+                        return (
+                          <td key={day} className="border border-slate-200 px-2 py-2 text-slate-600 text-center">
+                            {cell?.service_content || ''}
+                          </td>
+                        )
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
 
   // 第2表画面
   if (activeTab === 'table2') {
@@ -385,21 +448,51 @@ const CarePlanPage = ({ onBack }: CarePlanPageProps) => {
           <i className="fas fa-chevron-right text-slate-200 text-xs"></i>
         </button>
 
-        {/* 第3表（準備中） */}
-        <div className="w-full bg-white rounded-2xl px-4 py-4 border border-slate-100 shadow-sm flex items-center gap-4 opacity-50">
-          <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-xl shrink-0">
-            <i className="fas fa-calendar-week text-slate-300"></i>
+        {/* 第3表 */}
+        <button
+          onClick={() => setActiveTab('table3')}
+          className="w-full bg-white rounded-2xl px-4 py-4 border border-slate-100 shadow-sm flex items-center gap-4 hover:border-[#01C1AF]/30 transition-all active:scale-[0.98] text-left"
+        >
+          <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0 ${weeklyData.length > 0 ? '' : 'bg-slate-100'}`}
+            style={weeklyData.length > 0 ? { backgroundColor: `${primaryColor}15` } : {}}>
+            <i className={`fas fa-calendar-week ${weeklyData.length > 0 ? '' : 'text-slate-300'}`}
+              style={weeklyData.length > 0 ? { color: primaryColor } : {}}></i>
           </div>
           <div className="flex-1">
-            <p className="font-black text-sm text-slate-800">第3表</p>
-            <p className="text-[11px] text-slate-400">週間サービス計画表 <span className="text-slate-300">(準備中)</span></p>
+            <div className="flex items-center gap-2">
+              <p className="font-black text-sm text-slate-800">第3表</p>
+              {weeklyData.length > 0 ? (
+                <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full bg-teal-100 text-teal-600">生成済✓</span>
+              ) : (
+                <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-400">未生成</span>
+              )}
+            </div>
+            <p className="text-[11px] text-slate-400">週間サービス計画表</p>
           </div>
-        </div>
+          <i className="fas fa-chevron-right text-slate-200 text-xs"></i>
+        </button>
+
+        {/* 印刷 */}
+        <a
+          href={`/api/care-plan/export/${residentId}`}
+          target="_blank"
+          rel="noreferrer"
+          className="w-full bg-gradient-to-r from-teal-500 to-[#01C1AF] rounded-2xl px-4 py-4 flex items-center gap-4 transition-all active:scale-[0.98] text-left shadow-md"
+        >
+          <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center text-xl shrink-0">
+            <i className="fas fa-print text-white"></i>
+          </div>
+          <div className="flex-1">
+            <p className="font-black text-sm text-white">計画書を印刷する</p>
+            <p className="text-[11px] text-teal-100">第1〜3表をまとめてPDF・印刷</p>
+          </div>
+          <i className="fas fa-external-link-alt text-white/60 text-xs"></i>
+        </a>
 
         <div className="bg-slate-50 rounded-2xl px-4 py-3 border border-slate-100">
           <p className="text-[11px] text-slate-400 leading-relaxed">
             <i className="fas fa-info-circle mr-1"></i>
-            第2表・第3表は記録・24Hシートが充実した後、Day14のカンファレンスで自動生成されます。
+            第3表はDay14カンファレンスで24Hシートから自動生成されます。
           </p>
         </div>
       </div>

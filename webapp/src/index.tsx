@@ -63,12 +63,13 @@ app.put('/api/care-plans/:id', async (c) => {
     UPDATE care_plans
     SET time=?, activity=?, details=?, wishes=?, can_do=?,
         support_needed=?, medical_notes=?, remarks=?, status=?,
-        updated_at=CURRENT_TIMESTAMP
+        care_goal_id=?, updated_at=CURRENT_TIMESTAMP
     WHERE id=?`)
     .bind(
       body.time, body.activity, body.details ?? '',
       body.wishes ?? '', body.can_do ?? '', body.support_needed ?? '',
-      body.medical_notes ?? '', body.remarks ?? '', body.status, id
+      body.medical_notes ?? '', body.remarks ?? '', body.status,
+      body.care_goal_id ?? null, id
     ).run()
   return c.json({ success: true })
 })
@@ -218,6 +219,125 @@ app.post('/api/care-plan/table1/:residentId', async (c) => {
         body.comprehensive_policy).run()
   }
   return c.json({ success: true })
+})
+
+// ============================================
+// Day14 カンファレンス: 24Hシート→ケアプラン自動生成
+// ============================================
+
+app.post('/api/conference/generate/:residentId', async (c) => {
+  const id = c.req.param('residentId')
+  const { results: plans } = await c.env.DB.prepare(
+    'SELECT * FROM care_plans WHERE resident_id=? ORDER BY display_order ASC'
+  ).bind(id).all()
+  const { results: goals } = await c.env.DB.prepare(
+    'SELECT * FROM care_goals WHERE resident_id=? ORDER BY sort_order ASC'
+  ).bind(id).all()
+
+  // 課題ごとに24Hシートの内容を集約してケアプランに反映
+  for (const goal of goals as any[]) {
+    const linked = (plans as any[]).filter(p => p.care_goal_id === goal.id)
+    if (!linked.length) continue
+    const wishes = linked.map((p: any) => p.wishes).filter(Boolean).join('\n')
+    const canDo = linked.map((p: any) => p.can_do).filter(Boolean).join('。')
+    // 空欄のみ補完（手入力を上書きしない）
+    await c.env.DB.prepare(`
+      UPDATE care_goals SET
+        needs = CASE WHEN needs='' AND ? != '' THEN ? ELSE needs END,
+        short_term_goal = CASE WHEN short_term_goal='' AND ? != '' THEN ? ELSE short_term_goal END,
+        updated_at=CURRENT_TIMESTAMP WHERE id=?`)
+      .bind(wishes, wishes, canDo, canDo, goal.id).run()
+    // 援助内容が未作成なら support_needed から生成
+    const existing = await c.env.DB.prepare(
+      'SELECT COUNT(*) as cnt FROM care_goal_services WHERE care_goal_id=?'
+    ).bind(goal.id).first() as any
+    if ((existing?.cnt ?? 0) === 0) {
+      for (const p of linked.filter((x: any) => x.support_needed)) {
+        await c.env.DB.prepare(`
+          INSERT INTO care_goal_services (care_goal_id, service_content, service_type, person, frequency, sort_order)
+          VALUES (?,?,?,?,?,?)`)
+          .bind(goal.id, `${p.time} ${p.activity}：${p.support_needed}`, '介護', '介護スタッフ', '毎日', p.display_order).run()
+      }
+    }
+  }
+
+  // 第3表（週間サービス計画）を24Hシートから自動生成
+  await c.env.DB.prepare('DELETE FROM care_plan_weekly WHERE resident_id=?').bind(id).run()
+  const DAYS = ['月', '火', '水', '木', '金', '土', '日']
+  const BATH_DAYS = ['月', '水', '金']
+  for (const plan of plans as any[]) {
+    for (const day of DAYS) {
+      const act: string = plan.activity ?? ''
+      let content = act
+      if (act.includes('入浴') || act.includes('清拭')) {
+        content = BATH_DAYS.includes(day) ? '入浴' : '清拭'
+      }
+      await c.env.DB.prepare(`
+        INSERT INTO care_plan_weekly (resident_id, time_slot, day_of_week, service_content, sort_order)
+        VALUES (?,?,?,?,?)`)
+        .bind(id, plan.time, day, content, plan.display_order).run()
+    }
+  }
+  return c.json({ success: true })
+})
+
+// 第3表取得
+app.get('/api/care-plan/table3/:residentId', async (c) => {
+  const id = c.req.param('residentId')
+  const { results } = await c.env.DB.prepare(
+    'SELECT time_slot, day_of_week, service_content, sort_order FROM care_plan_weekly WHERE resident_id=? ORDER BY sort_order ASC, time_slot ASC'
+  ).bind(id).all()
+  return c.json(results)
+})
+
+// 計画書印刷用HTML出力（第1〜3表）
+app.get('/api/care-plan/export/:residentId', async (c) => {
+  const id = c.req.param('residentId')
+  const resident = await c.env.DB.prepare('SELECT * FROM residents WHERE id=?').bind(id).first() as any
+  const t1 = await c.env.DB.prepare('SELECT * FROM care_plan_table1 WHERE resident_id=?').bind(id).first() as any
+  const { results: goals } = await c.env.DB.prepare('SELECT * FROM care_goals WHERE resident_id=? ORDER BY sort_order').bind(id).all()
+  const { results: services } = await c.env.DB.prepare('SELECT * FROM care_goal_services WHERE care_goal_id IN (SELECT id FROM care_goals WHERE resident_id=?) ORDER BY care_goal_id, sort_order').bind(id).all()
+  const { results: weekly } = await c.env.DB.prepare('SELECT time_slot, day_of_week, service_content, sort_order FROM care_plan_weekly WHERE resident_id=? ORDER BY sort_order, time_slot').bind(id).all()
+  const goalsWithSv = (goals as any[]).map(g => ({ ...g, services: (services as any[]).filter(s => s.care_goal_id === g.id) }))
+  const DAYS = ['月', '火', '水', '木', '金', '土', '日']
+  const slots = [...new Set((weekly as any[]).map(w => w.time_slot))].sort()
+  const css = `body{font-family:'Hiragino Kaku Gothic ProN',Meiryo,sans-serif;font-size:11px;color:#333;padding:16px}
+    @media print{@page{margin:12mm;size:A4}.no-print{display:none}.pb{page-break-after:always}}
+    h1{font-size:14px;color:#01C1AF;border-bottom:2px solid #01C1AF;padding-bottom:6px;margin:0 0 12px}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+    .cell{border:1px solid #eee;padding:5px 8px;border-radius:4px;font-size:10px}
+    .cell label{color:#999;font-size:9px;display:block}
+    .sec{margin-bottom:10px}.sec label{font-size:9px;font-weight:bold;color:#666;display:block;margin-bottom:2px}
+    .sec p{line-height:1.6;margin:0}
+    table{width:100%;border-collapse:collapse;font-size:9px}th,td{border:1px solid #ccc;padding:5px 6px;text-align:left;vertical-align:top}
+    th{background:#f5f5f5;font-weight:bold}.gn{background:#01C1AF;color:white;text-align:center;width:20px}
+    .btn{position:fixed;bottom:16px;right:16px;padding:10px 20px;background:#01C1AF;color:white;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:bold}`
+  const html = `<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>施設サービス計画書</title><style>${css}</style></head><body>
+  <button class="no-print btn" onclick="window.print()">🖨️ 印刷</button>
+  <h1>第1表　施設サービス計画書（1）　${resident?.name}　様</h1>
+  <div class="grid2">
+    <div class="cell"><label>計画作成者</label>${t1?.cm_name||'—'}</div>
+    <div class="cell"><label>施設名</label>${t1?.facility_name||'—'}</div>
+    <div class="cell"><label>要介護度</label>${resident?.care_level}</div>
+    <div class="cell"><label>認定有効期間</label>${t1?.valid_period_from||''}～${t1?.valid_period_to||''}</div>
+    <div class="cell"><label>計画作成日</label>${t1?.created_date||'—'}</div>
+    <div class="cell"><label>計画変更日</label>${t1?.revised_date||'—'}</div>
+  </div>
+  ${t1?.entry_background?`<div class="sec"><label>入所の至った経緒</label><p>${t1.entry_background}</p></div>`:''}
+  ${t1?.resident_wishes?`<div class="sec"><label>本人の意向</label><p>${t1.resident_wishes}</p></div>`:''}
+  ${t1?.family_wishes?`<div class="sec"><label>家族の意向</label><p>${t1.family_wishes}</p></div>`:''}
+  ${t1?.comprehensive_policy?`<div class="sec"><label>総合的な支援の方针</label><p>${t1.comprehensive_policy}</p></div>`:''}
+  <div class="pb"></div>
+  <h1>第2表　施設サービス計画書（2）</h1>
+  <table><thead><tr><th style="width:18px">No</th><th style="width:22%">課題（ニーズ）</th><th style="width:25%">目標</th><th>援助内容</th></tr></thead><tbody>
+  ${goalsWithSv.map((g:any,i:number)=>`<tr><td class="gn">${i+1}</td><td>${g.needs||'—'}</td><td><b>長期:</b> ${g.long_term_goal||'—'}<br><small>${g.long_term_from||''}～${g.long_term_to||''}</small><br><br><b>短期:</b> ${g.short_term_goal||'—'}<br><small>${g.short_term_from||''}～${g.short_term_to||''}</small></td><td>${g.services.length?`<table><tr><th>サービス内容</th><th style="width:35px">種別</th><th style="width:45px">担当</th><th style="width:35px">頻度</th></tr>${g.services.map((s:any)=>`<tr><td>${s.service_content}</td><td>${s.service_type}</td><td>${s.person}</td><td>${s.frequency}</td></tr>`).join('')}</table>`:'（援助内容未入力）'}</td></tr>`).join('')}
+  </tbody></table>
+  <div class="pb"></div>
+  <h1>第3表　週間サービス計画表</h1>
+  ${slots.length?`<table><thead><tr><th style="width:50px">時間帯</th>${DAYS.map(d=>`<th>${d}</th>`).join('')}</tr></thead><tbody>${slots.map(slot=>`<tr><td style="text-align:center;font-weight:bold">${slot}</td>${DAYS.map(day=>{const w=(weekly as any[]).find(x=>x.time_slot===slot&&x.day_of_week===day);return`<td>${w?.service_content||''}</td>`}).join('')}</tr>`).join('')}</tbody></table>`:
+  '<p style="color:#999">第3表はカンファレンスで自動生成されます</p>'}
+  </body></html>`
+  return c.html(html)
 })
 
 // ============================================

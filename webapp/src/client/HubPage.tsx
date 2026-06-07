@@ -15,7 +15,7 @@ interface HubData {
 }
 
 interface HubPageProps {
-  onGoTo: (view: 'main' | 'sheet' | 'care-plan') => void
+  onGoTo: (view: 'main' | 'sheet' | 'care-plan' | 'conference') => void
 }
 
 const getAppPhase = (day: number, fitRatio: number): AppPhase => {
@@ -105,7 +105,7 @@ const HubPage = ({ onGoTo }: HubPageProps) => {
             <p className="text-[11px] text-teal-100">24Hシート→ケアプランの準備ができています</p>
           </div>
         </div>
-        <button onClick={() => onGoTo('care-plan')} className="w-full bg-white text-teal-600 font-black py-3 rounded-xl transition-all active:scale-95">
+        <button onClick={() => onGoTo('conference')} className="w-full bg-white text-teal-600 font-black py-3 rounded-xl transition-all active:scale-95">
           ケアプランを生成する →
         </button>
       </div>
