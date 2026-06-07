@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import SheetPage from './SheetPage'
+import HubPage from './HubPage'
 
 // ============================================
 // Types
@@ -76,7 +77,7 @@ const App = () => {
   const [aiLoading, setAiLoading] = useState(false)
   const [loading, setLoading] = useState(true)
   const [resetting, setResetting] = useState(false)
-  const [currentView, setCurrentView] = useState<'main' | 'sheet'>('main')
+  const [currentView, setCurrentView] = useState<'hub' | 'main' | 'sheet' | 'care-plan'>('hub')
 
   const [showInsightForm, setShowInsightForm] = useState(false)
   const [insightContent, setInsightContent] = useState('')
@@ -280,7 +281,14 @@ const App = () => {
     )
   }
 
-  if (currentView === 'sheet') return <SheetPage residentId={residentId} onBack={() => setCurrentView('main')} />
+  if (currentView === 'hub') return <HubPage onGoTo={(v) => setCurrentView(v)} />
+  if (currentView === 'sheet') return <SheetPage residentId={residentId} onBack={() => setCurrentView('hub')} />
+  if (currentView === 'care-plan') return (
+    <div className="flex items-center justify-center h-screen bg-[#FDFCF9] flex-col gap-4">
+      <p className="text-slate-400 font-bold">施設サービス計画書（準備中）</p>
+      <button onClick={() => setCurrentView('hub')} className="text-sm font-bold text-[#01C1AF]">← ホームに戻る</button>
+    </div>
+  )
 
   const stickyNotesByTime: Record<string, StickyNote[]> = {}
   stickyNotes.forEach(note => {
@@ -296,6 +304,9 @@ const App = () => {
       {/* モバイル用ヘッダー */}
       <div className="lg:hidden bg-white border-b border-slate-200 p-4 shrink-0">
         <div className="flex items-center gap-3">
+          <button onClick={() => setCurrentView('hub')} className="text-slate-400 hover:text-slate-600 transition-colors mr-1">
+            <i className="fas fa-arrow-left text-sm"></i>
+          </button>
           <div className="relative">
             <div className="w-12 h-12 rounded-full bg-orange-100 border-2 border-white shadow-md flex items-center justify-center overflow-hidden">
               <img src="/static/okada-profile.jpg" alt={resident.name} className="w-full h-full object-cover" />
@@ -366,13 +377,21 @@ const App = () => {
             </div>
             <p className="text-[11px] font-bold text-slate-600 leading-snug">「{resident.today_wish}」</p>
           </div>
-          <button
-            onClick={() => setCurrentView('sheet')}
-            className="w-full text-[10px] font-bold py-2 px-3 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-1 border"
-            style={{ borderColor: primaryColor, color: primaryColor }}
-          >
-            <i className="fas fa-table"></i>24Hシート管理
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setCurrentView('hub')}
+              className="flex-1 text-[10px] font-bold py-2 px-3 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-1 bg-slate-100 text-slate-500 hover:bg-slate-200"
+            >
+              <i className="fas fa-home"></i>ホーム
+            </button>
+            <button
+              onClick={() => setCurrentView('sheet')}
+              className="flex-1 text-[10px] font-bold py-2 px-3 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-1 border"
+              style={{ borderColor: primaryColor, color: primaryColor }}
+            >
+              <i className="fas fa-table"></i>24Hシート
+            </button>
+          </div>
         </div>
         <div className="px-4 lg:px-6 py-2">
           <h3 className="text-xs font-black text-slate-300 uppercase tracking-widest flex items-center gap-2 mb-4">
