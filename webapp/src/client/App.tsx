@@ -386,44 +386,20 @@ const App = () => {
     <BottomTabBar currentView={currentView} onNavigate={nav} />
     <div className="flex flex-col bg-[#FDFCF9] font-sans text-slate-800 overflow-hidden" style={{ height: 'calc(100dvh - 0px)' }}>
 
-      {/* モバイル用ヘッダー */}
-      <div className="lg:hidden bg-white border-b border-slate-200 p-4 shrink-0">
+      {/* モバイル用ヘッダー（シンプル） */}
+      <div className="lg:hidden bg-white border-b border-slate-100 px-4 py-3 shrink-0">
         <div className="flex items-center gap-3">
-          <button onClick={() => setCurrentView('hub')} className="text-slate-400 hover:text-slate-600 transition-colors mr-1">
-            <i className="fas fa-arrow-left text-sm"></i>
-          </button>
-          <div className="w-12 h-12 rounded-full bg-orange-100 border-2 border-white shadow-md overflow-hidden">
+          <div className="w-9 h-9 rounded-xl bg-orange-100 overflow-hidden shrink-0">
             <img src="/static/okada-profile.jpg" alt={resident.name} className="w-full h-full object-cover" />
           </div>
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-black text-slate-800">{resident.name} 様</h2>
-              <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded-md font-bold text-slate-500">{resident.care_level}</span>
-            </div>
-            <p className="text-xs text-slate-400 font-medium">Day {resident.maturation_day}/14</p>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-black text-slate-800 truncate">{resident.name} 様</p>
+            <p className="text-[10px] text-slate-400">Day {resident.maturation_day} · {resident.care_level}</p>
           </div>
-          <button
-            onClick={() => setCurrentView('sheet')}
-            className="text-[10px] font-black px-3 py-2 rounded-xl text-white flex items-center gap-1 shadow-sm"
-            style={{ backgroundColor: primaryColor }}
-          >
-            <i className="fas fa-table"></i> シート
-          </button>
-        </div>
-      </div>
-
-      {/* モバイル用タブナビゲーション */}
-      <div className="lg:hidden bg-white border-b border-slate-200 shrink-0">
-        <div className="flex">
-          <button onClick={() => setMobileTab('care-plan')} className={'flex-1 py-3 text-sm font-medium border-b-2 transition-colors ' + (mobileTab === 'care-plan' ? 'border-[#01C1AF] text-[#01C1AF]' : 'border-transparent text-slate-400')}>
-            <i className="fas fa-clock mr-1"></i> プラン
-          </button>
-          <button onClick={() => setMobileTab('case-record')} className={'flex-1 py-4 text-base font-black border-b-4 transition-colors ' + (mobileTab === 'case-record' ? 'border-[#01C1AF] text-[#01C1AF] bg-[#01C1AF]/5' : 'border-transparent text-slate-400')}>
-            <i className="fas fa-clipboard-list mr-1"></i> 記録
-          </button>
-          <button onClick={() => setMobileTab('insights')} className={'flex-1 py-3 text-sm font-medium border-b-2 transition-colors ' + (mobileTab === 'insights' ? 'border-[#01C1AF] text-[#01C1AF]' : 'border-transparent text-slate-400')}>
-            <i className="fas fa-lightbulb mr-1"></i> 気づき
-          </button>
+          {/* 現在の表示パネルのラベル */}
+          <span className="text-[10px] font-black px-2 py-1 rounded-lg" style={{ backgroundColor: `${primaryColor}15`, color: primaryColor }}>
+            {mobileTab === 'care-plan' ? '24Hプラン' : mobileTab === 'case-record' ? 'ケース記録' : '気づき'}
+          </span>
         </div>
       </div>
 
@@ -431,6 +407,18 @@ const App = () => {
       <div className="lg:hidden flex-1 relative overflow-hidden"
         onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}
       >
+        {/* ドットインジケーター */}
+        <div className="absolute bottom-20 left-0 right-0 flex justify-center gap-1.5 z-50 pointer-events-none">
+          {(['care-plan', 'case-record', 'insights'] as const).map((tab) => (
+            <div key={tab} className="rounded-full transition-all duration-300"
+              style={{
+                width: mobileTab === tab ? 20 : 6,
+                height: 6,
+                backgroundColor: mobileTab === tab ? primaryColor : '#CBD5E1',
+              }}
+            />
+          ))}
+        </div>
 
       {/* 左カラム：24時間シート */}
       <div className="flex flex-col z-30 bg-white" style={mobilePaneStyle(0)}>
