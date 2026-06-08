@@ -35,6 +35,7 @@ const ConferencePage = ({ onBack, onComplete }: ConferencePageProps) => {
   const [loading, setLoading] = useState(true)
   const [generating, setGenerating] = useState(false)
   const [done, setDone] = useState(false)
+  const [expandedGoal, setExpandedGoal] = useState<number | null>(null)
 
   useEffect(() => { fetchData() }, [])
 
@@ -46,6 +47,8 @@ const ConferencePage = ({ onBack, onComplete }: ConferencePageProps) => {
       ])
       setPlans(plansRes.data)
       setGoals(goalsRes.data)
+      // 最初の課題を展開状態にする
+      if (goalsRes.data.length > 0) setExpandedGoal(goalsRes.data[0].id)
     } catch (e) { console.error(e) }
     finally { setLoading(false) }
   }
@@ -58,8 +61,10 @@ const ConferencePage = ({ onBack, onComplete }: ConferencePageProps) => {
     try {
       await axios.post(`/api/conference/generate/${residentId}`)
       setDone(true)
-    } catch (e) { console.error(e) }
-    finally { setGenerating(false) }
+    } catch (e) {
+      console.error(e)
+      alert('生成に失敗しました。もう一度お試しください。')
+    } finally { setGenerating(false) }
   }
 
   if (loading) return (
@@ -67,6 +72,9 @@ const ConferencePage = ({ onBack, onComplete }: ConferencePageProps) => {
       <div className="animate-spin rounded-full h-10 w-10 border-b-2" style={{ borderColor: primaryColor }}></div>
     </div>
   )
+
+  // 課題に紐づいていない24Hシート項目
+  const unlinkedPlans = plans.filter(p => !p.care_goal_id && (p.can_do || p.wishes || p.support_needed))
 
   return (
     <div className="flex flex-col h-screen bg-[#FDFCF9] font-sans">
@@ -98,71 +106,7 @@ const ConferencePage = ({ onBack, onComplete }: ConferencePageProps) => {
               </div>
             </div>
 
-            {/* マッピングプレビュー */}
-            <div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">🔄 自動マッピングの内容</p>
-              <div className="space-y-2">
-                <div className="bg-white rounded-2xl px-4 py-3 border border-slate-100 shadow-sm flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 text-xs shrink-0 mt-0.5">意</div>
-                  <div>
-                    <p className="text-xs font-black text-slate-700">意向・好み → 課題（ニーズ）</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">24Hシートの「意向・好み」を第2表の課題に追加</p>
-                  </div>
-                </div>
-                <div className="bg-white rounded-2xl px-4 py-3 border border-slate-100 shadow-sm flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 text-xs shrink-0 mt-0.5">能</div>
-                  <div>
-                    <p className="text-xs font-black text-slate-700">自分のできること → 短期目標</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">24Hシートの「自分のできること」を短期目標に反映</p>
-                  </div>
-                </div>
-                <div className="bg-white rounded-2xl px-4 py-3 border border-slate-100 shadow-sm flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-xs shrink-0 mt-0.5">援</div>
-                  <div>
-                    <p className="text-xs font-black text-slate-700">サポートの必要なこと → 援助内容</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">24Hシートの「サポート」を第2表援助内容に生成</p>
-                  </div>
-                </div>
-                <div className="bg-white rounded-2xl px-4 py-3 border border-slate-100 shadow-sm flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 text-xs shrink-0 mt-0.5">週</div>
-                  <div>
-                    <p className="text-xs font-black text-slate-700">時間帯パターン → 第3表（週間サービス計画）</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">24Hシートの全項目に対して週間スケジュールを自動生成</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 課題結びつき状況 */}
-            {goals.length > 0 && (
-              <div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">🎯 課題ごとの結びつき状況</p>
-                <div className="space-y-2">
-                  {goals.map((g, i) => {
-                    const linked = plans.filter(p => p.care_goal_id === g.id)
-                    return (
-                      <div key={g.id} className="bg-white rounded-2xl px-4 py-3 border border-slate-100 shadow-sm">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="w-5 h-5 rounded-full text-white text-[10px] font-black flex items-center justify-center" style={{ backgroundColor: primaryColor }}>{i+1}</span>
-                          <p className="text-sm font-black text-slate-700 flex-1 truncate">{g.needs || '（課題未入力）'}</p>
-                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${linked.length > 0 ? 'bg-teal-100 text-teal-600' : 'bg-slate-100 text-slate-400'}`}>
-                            {linked.length}件結びつき
-                          </span>
-                        </div>
-                        {linked.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-2">
-                            {linked.map(p => (
-                              <span key={p.id} className="text-[9px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">{p.time} {p.activity}</span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            )}
-
+            {/* 警告: 課題未設定 */}
             {linkedCount === 0 && (
               <div className="bg-amber-50 rounded-2xl px-4 py-3 border border-amber-200">
                 <p className="text-xs font-bold text-amber-700">
@@ -172,6 +116,137 @@ const ConferencePage = ({ onBack, onComplete }: ConferencePageProps) => {
                 </p>
               </div>
             )}
+
+            {/* 課題ごとのプレビュー */}
+            {goals.length > 0 && (
+              <div>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
+                  🎯 課題ごとの生成プレビュー
+                </p>
+                <div className="space-y-2">
+                  {goals.map((g, i) => {
+                    const linked = plans.filter(p => p.care_goal_id === g.id)
+                    const isExpanded = expandedGoal === g.id
+                    // 生成される内容をプレビュー
+                    const wishesTexts = linked.filter(p => p.wishes).map(p => p.wishes)
+                    const canDoTexts = linked.filter(p => p.can_do).map(p => p.can_do)
+                    const supportTexts = linked.filter(p => p.support_needed).map(p => p.support_needed)
+
+                    return (
+                      <div key={g.id} className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                        <button
+                          className="w-full px-4 py-3 flex items-center gap-2 text-left"
+                          onClick={() => setExpandedGoal(isExpanded ? null : g.id)}
+                        >
+                          <span
+                            className="w-5 h-5 rounded-full text-white text-[10px] font-black flex items-center justify-center shrink-0"
+                            style={{ backgroundColor: primaryColor }}
+                          >{i + 1}</span>
+                          <p className="text-sm font-black text-slate-700 flex-1 truncate">
+                            {g.needs || '（課題未入力）'}
+                          </p>
+                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-full shrink-0 ${linked.length > 0 ? 'bg-teal-100 text-teal-600' : 'bg-slate-100 text-slate-400'}`}>
+                            {linked.length}件
+                          </span>
+                          <i className={`fas fa-chevron-${isExpanded ? 'up' : 'down'} text-slate-300 text-xs shrink-0`}></i>
+                        </button>
+
+                        {isExpanded && (
+                          <div className="border-t border-slate-50 px-4 pb-4 pt-3 space-y-3">
+                            {linked.length === 0 ? (
+                              <p className="text-xs text-slate-400 text-center py-2">
+                                この課題に結びついた24Hシート項目がありません
+                              </p>
+                            ) : (
+                              <>
+                                {/* 生成されるフィールドのプレビュー */}
+                                {wishesTexts.length > 0 && (
+                                  <div>
+                                    <div className="flex items-center gap-1.5 mb-1.5">
+                                      <span className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 text-[10px] font-black">意</span>
+                                      <p className="text-[10px] font-black text-slate-500">意向・好み → 課題（ニーズ）に追加</p>
+                                    </div>
+                                    <div className="space-y-1 ml-6">
+                                      {wishesTexts.map((t, j) => (
+                                        <p key={j} className="text-xs text-slate-600 bg-amber-50 rounded-lg px-2 py-1 leading-relaxed">"{t}"</p>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                                {canDoTexts.length > 0 && (
+                                  <div>
+                                    <div className="flex items-center gap-1.5 mb-1.5">
+                                      <span className="w-5 h-5 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 text-[10px] font-black">能</span>
+                                      <p className="text-[10px] font-black text-slate-500">自分のできること → 短期目標に反映</p>
+                                    </div>
+                                    <div className="space-y-1 ml-6">
+                                      {canDoTexts.map((t, j) => (
+                                        <p key={j} className="text-xs text-slate-600 bg-teal-50 rounded-lg px-2 py-1 leading-relaxed">"{t}"</p>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                                {supportTexts.length > 0 && (
+                                  <div>
+                                    <div className="flex items-center gap-1.5 mb-1.5">
+                                      <span className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-[10px] font-black">援</span>
+                                      <p className="text-[10px] font-black text-slate-500">サポートの必要なこと → 援助内容に生成</p>
+                                    </div>
+                                    <div className="space-y-1 ml-6">
+                                      {supportTexts.map((t, j) => (
+                                        <p key={j} className="text-xs text-slate-600 bg-blue-50 rounded-lg px-2 py-1 leading-relaxed">"{t}"</p>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                                {/* 時間帯タグ */}
+                                <div className="flex flex-wrap gap-1 pt-1">
+                                  {linked.map(p => (
+                                    <span key={p.id} className="text-[9px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">
+                                      {p.time} {p.activity}
+                                    </span>
+                                  ))}
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* 課題未結びつき項目 */}
+            {unlinkedPlans.length > 0 && (
+              <div>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
+                  ⚠️ 課題に未結びつきの項目（{unlinkedPlans.length}件）
+                </p>
+                <div className="bg-slate-50 rounded-2xl px-4 py-3 border border-dashed border-slate-200">
+                  <p className="text-[11px] text-slate-500 mb-2">以下の項目は新規課題として自動追加されます：</p>
+                  <div className="flex flex-wrap gap-1">
+                    {unlinkedPlans.map(p => (
+                      <span key={p.id} className="text-[10px] bg-white text-slate-500 px-2 py-0.5 rounded-full border border-slate-200">
+                        {p.time} {p.activity}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 第3表プレビュー説明 */}
+            <div className="bg-white rounded-2xl px-4 py-3 border border-slate-100 shadow-sm flex items-start gap-3">
+              <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 text-xs shrink-0 mt-0.5">週</div>
+              <div>
+                <p className="text-xs font-black text-slate-700">時間帯パターン → 第3表（週間サービス計画）</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  {plans.length}件の24Hシート項目から週間スケジュールを自動生成します
+                </p>
+              </div>
+            </div>
 
             <button
               onClick={handleGenerate}
@@ -188,13 +263,37 @@ const ConferencePage = ({ onBack, onComplete }: ConferencePageProps) => {
           </>
         ) : (
           <div className="text-center py-12">
-            <div className="w-20 h-20 rounded-full flex items-center justify-center text-3xl mx-auto mb-6 shadow-lg" style={{ backgroundColor: `${primaryColor}20` }}>
+            <div
+              className="w-20 h-20 rounded-full flex items-center justify-center text-3xl mx-auto mb-6 shadow-lg"
+              style={{ backgroundColor: `${primaryColor}20` }}
+            >
               🎉
             </div>
             <h2 className="text-xl font-black text-slate-800 mb-2">ケアプランを生成しました</h2>
-            <p className="text-sm text-slate-500 mb-8">
-              第2表・第3表が自動入力されました。内容を確認・編集してください。
+            <p className="text-sm text-slate-500 mb-2">
+              第2表・第3表が自動入力されました。
             </p>
+            <p className="text-xs text-slate-400 mb-8">
+              内容を確認・編集して施設サービス計画書を完成させてください。
+            </p>
+
+            {/* 生成サマリー */}
+            <div className="bg-slate-50 rounded-2xl px-4 py-4 text-left mb-6 space-y-2">
+              <p className="text-[10px] font-black text-slate-400 mb-3">生成内容</p>
+              <div className="flex items-center gap-2">
+                <i className="fas fa-check-circle text-teal-400 text-sm w-5"></i>
+                <p className="text-xs text-slate-600">第2表 — {goals.length}件の課題・援助内容</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <i className="fas fa-check-circle text-teal-400 text-sm w-5"></i>
+                <p className="text-xs text-slate-600">第3表 — {plans.length}件の時間帯から週間計画</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <i className="fas fa-info-circle text-slate-300 text-sm w-5"></i>
+                <p className="text-xs text-slate-400">既存の入力値は上書きされていません</p>
+              </div>
+            </div>
+
             <div className="space-y-3">
               <button
                 onClick={onComplete}
@@ -204,7 +303,7 @@ const ConferencePage = ({ onBack, onComplete }: ConferencePageProps) => {
                 施設サービス計画書を確認する →
               </button>
               <button onClick={onBack} className="w-full bg-slate-100 text-slate-600 font-bold py-3 rounded-2xl text-sm">
-                ホームに戺る
+                ホームに戻る
               </button>
             </div>
           </div>
