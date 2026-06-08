@@ -566,7 +566,12 @@ const App = () => {
 
         <div className="shrink-0 px-3 pt-2 pb-20 lg:p-8 lg:pt-0 lg:pb-8">
           {/* タグ: モバイルは横スクロール */}
-          <div className="flex gap-1.5 overflow-x-auto scrollbar-hide mb-2 pb-1">
+          <div
+            className="flex gap-1.5 overflow-x-auto scrollbar-hide mb-2 pb-1"
+            onTouchStart={(e) => e.stopPropagation()}
+            onTouchMove={(e) => e.stopPropagation()}
+            onTouchEnd={(e) => e.stopPropagation()}
+          >
             {['食事', '排泄', '起床', '活動', '入浴', '就寝', 'ケア', '巡視', 'その他'].map(tag => (
               <button key={tag} onClick={() => setRecordTag(tag)}
                 className={`text-[10px] font-bold px-2.5 py-1 rounded-full transition-all whitespace-nowrap shrink-0 ${recordTag === tag ? 'bg-[#01C1AF] text-white' : 'bg-slate-100 text-slate-500'}`}>
