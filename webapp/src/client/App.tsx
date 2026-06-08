@@ -144,6 +144,17 @@ const App = () => {
     fetchAllData()
   }, [])
 
+  // iOS: キーボード閉じた後にビューポートのズームをリセット
+  useEffect(() => {
+    const handleFocusOut = () => {
+      setTimeout(() => {
+        window.scrollTo(0, window.scrollY)
+      }, 50)
+    }
+    document.addEventListener('focusout', handleFocusOut)
+    return () => document.removeEventListener('focusout', handleFocusOut)
+  }, [])
+
   useEffect(() => {
     if (!loading) {
       fetchCaseRecords()
