@@ -199,13 +199,15 @@ const App = () => {
   const mobileTabIndex = MOBILE_TABS.indexOf(mobileTab as typeof MOBILE_TABS[number])
 
   // 各カラムのmobileでのtranslateX（ドラッグオフセット込み）
+  // パネル自体はoverflow:hidden + flex-col。スクロールは内部のflex-1要素が担う
   const mobilePaneStyle = (index: number): React.CSSProperties => ({
     position: 'absolute',
     inset: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden',
     transform: `translateX(calc(${(index - mobileTabIndex) * 100}% + ${isDragging ? dragOffset : 0}px))`,
     transition: isDragging ? 'none' : 'transform 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-    overflowY: 'auto',
-    overflowX: 'hidden',
   })
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -407,8 +409,8 @@ const App = () => {
       <div className="lg:hidden flex-1 relative overflow-hidden"
         onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}
       >
-        {/* ドットインジケーター */}
-        <div className="absolute bottom-20 left-0 right-0 flex justify-center gap-1.5 z-50 pointer-events-none">
+        {/* ドットインジケーター（ボトムタブの直上） */}
+        <div className="absolute bottom-16 left-0 right-0 flex justify-center gap-1.5 z-50 pointer-events-none">
           {(['care-plan', 'case-record', 'insights'] as const).map((tab) => (
             <div key={tab} className="rounded-full transition-all duration-300"
               style={{
@@ -452,12 +454,12 @@ const App = () => {
             <i className="fas fa-clock"></i>24Hシートを管理
           </button>
         </div>
-        <div className="px-4 lg:px-6 py-2">
-          <h3 className="text-xs font-black text-slate-300 uppercase tracking-widest flex items-center gap-2 mb-4">
+        <div className="px-4 lg:px-6 py-2 shrink-0">
+          <h3 className="text-xs font-black text-slate-300 uppercase tracking-widest flex items-center gap-2 mb-1">
             <i className="fas fa-clock text-sm"></i> 24時間の暮らしプラン
           </h3>
         </div>
-        <div className="flex-1 overflow-y-auto px-4 lg:px-6 pb-8 space-y-4 lg:space-y-6 relative">
+        <div className="flex-1 overflow-y-auto px-4 lg:px-6 pb-20 lg:pb-8 space-y-4 lg:space-y-6 relative">
           <div className="absolute left-8 lg:left-11 top-0 bottom-0 w-px bg-slate-100 -z-0"></div>
           {carePlans.map((item) => (
             <div key={item.id} className="relative z-10">
@@ -562,7 +564,7 @@ const App = () => {
           )}
         </div>
 
-        <div className="px-3 pt-2 pb-24 lg:p-8 lg:pt-0 lg:pb-8">
+        <div className="shrink-0 px-3 pt-2 pb-20 lg:p-8 lg:pt-0 lg:pb-8">
           {/* タグ: モバイルは横スクロール */}
           <div className="flex gap-1.5 overflow-x-auto scrollbar-hide mb-2 pb-1">
             {['食事', '排泄', '起床', '活動', '入浴', '就寝', 'ケア', '巡視', 'その他'].map(tag => (
@@ -586,7 +588,7 @@ const App = () => {
 
       {/* 右カラム：気づき・AIアシスタント */}
       <div className="flex flex-col bg-slate-50/50" style={mobilePaneStyle(2)}>
-        <div className="p-4 lg:p-8 lg:pb-4">
+        <div className="shrink-0 p-4 lg:p-8 lg:pb-4">
           <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
             <i className="fas fa-chart-line" style={{ color: primaryColor }}></i> Care Fit Cycle
             <button
@@ -617,7 +619,7 @@ const App = () => {
           </div>
         </div>
 
-        <div className="px-4 lg:px-8 pb-4">
+        <div className="shrink-0 px-4 lg:px-8 pb-3">
           {!showInsightForm ? (
             <button onClick={() => setShowInsightForm(true)} className="w-full bg-amber-400 hover:bg-amber-500 text-white font-black py-3 lg:py-4 rounded-[20px] lg:rounded-[24px] shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2">
               <i className="fas fa-lightbulb text-base lg:text-lg"></i>気づきを書く
@@ -669,7 +671,7 @@ const App = () => {
           )}
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 lg:px-8 pb-4 space-y-4 lg:space-y-6">
+        <div className="flex-1 overflow-y-auto px-4 lg:px-8 pb-20 lg:pb-4 space-y-4 lg:space-y-6">
           <div className="mb-4">
             <div className="flex items-center justify-between mb-3">
               <h4 className="text-sm font-black text-slate-800 flex items-center gap-2">
