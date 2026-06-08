@@ -169,6 +169,95 @@ app.put('/api/sticky-notes/:id', async (c) => {
   return c.json({ success: true })
 })
 
+// ============================================
+// サイクル管理
+// ============================================
+
+// アクティブサイクル取得
+app.get('/api/residents/:id/cycle', async (c) => {
+  const id = c.req.param('id')
+  const result = await c.env.DB.prepare(
+    "SELECT * FROM care_cycles WHERE resident_id=? AND status='active' ORDER BY created_at DESC LIMIT 1"
+  ).bind(id).first()
+  return c.json(result || null)
+})
+
+// サイクル一覧取得（履歴）
+app.get('/api/residents/:id/cycles', async (c) => {
+  const id = c.req.param('id')
+  const { results } = await c.env.DB.prepare(
+    'SELECT * FROM care_cycles WHERE resident_id=? ORDER BY created_at DESC'
+  ).bind(id).all()
+  return c.json(results)
+})
+
+// 新サイクル開始
+app.post('/api/residents/:id/cycle/start', async (c) => {
+  const id = c.req.param('id')
+  const body = await c.req.json()
+  // 既存のアクティブサイクルを完了にする
+  const today = new Date().toISOString().split('T')[0]
+  await c.env.DB.prepare(
+    "UPDATE care_cycles SET status='completed', end_date=? WHERE resident_id=? AND status='active'"
+  ).bind(today, id).run()
+  // 新サイクル作成
+  const nextReview = new Date()
+  nextReview.setMonth(nextReview.getMonth() + 6)
+  const result = await c.env.DB.prepare(`
+    INSERT INTO care_cycles (resident_id, start_date, status, trigger_reason, next_review_date, notes)
+    VALUES (?, ?, 'active', ?, ?, ?)`)
+    .bind(id, today, body.trigger_reason || '定期改定', nextReview.toISOString().split('T')[0], body.notes || '')
+    .run()
+  // residents.maturation_day をリセット
+  await c.env.DB.prepare(
+    "UPDATE residents SET maturation_day=1, phase='recording', updated_at=CURRENT_TIMESTAMP WHERE id=?"
+  ).bind(id).run()
+  return c.json({ success: true, id: result.meta.last_row_id })
+})
+
+// サイクルにケアプラン生成日を記録
+app.post('/api/residents/:id/cycle/plan-generated', async (c) => {
+  const id = c.req.param('id')
+  const now = new Date().toISOString()
+  await c.env.DB.prepare(
+    "UPDATE care_cycles SET plan_generated_at=? WHERE resident_id=? AND status='active'"
+  ).bind(now, id).run()
+  return c.json({ success: true })
+})
+
+// ============================================
+// モニタリング記録
+// ============================================
+
+// モニタリング記録一覧
+app.get('/api/residents/:id/monitoring', async (c) => {
+  const id = c.req.param('id')
+  const { results } = await c.env.DB.prepare(`
+    SELECT mr.*, cg.needs as goal_needs
+    FROM monitoring_records mr
+    LEFT JOIN care_goals cg ON mr.goal_id = cg.id
+    WHERE mr.resident_id=?
+    ORDER BY mr.recorded_at DESC
+  `).bind(id).all()
+  return c.json(results)
+})
+
+// モニタリング記録追加
+app.post('/api/residents/:id/monitoring', async (c) => {
+  const id = c.req.param('id')
+  const body = await c.req.json()
+  const cycle = await c.env.DB.prepare(
+    "SELECT id FROM care_cycles WHERE resident_id=? AND status='active' LIMIT 1"
+  ).bind(id).first() as any
+  const result = await c.env.DB.prepare(`
+    INSERT INTO monitoring_records (resident_id, cycle_id, goal_id, recorded_at, achievement, comment, recorded_by)
+    VALUES (?, ?, ?, ?, ?, ?, ?)`)
+    .bind(id, cycle?.id || null, body.goal_id || null,
+      new Date().toISOString(), body.achievement, body.comment || '', body.recorded_by || '')
+    .run()
+  return c.json({ success: true, id: result.meta.last_row_id })
+})
+
 // スタッフ一覧
 app.get('/api/staff', async (c) => {
   const { results } = await c.env.DB.prepare('SELECT * FROM staff ORDER BY name ASC').all()
@@ -475,18 +564,29 @@ app.post('/api/demo/reset', async (c) => {
     const d = new Date(); d.setDate(d.getDate() - 1)
     const yesterday = d.toISOString().split('T')[0]
     await c.env.DB.batch([
+      c.env.DB.prepare('DELETE FROM monitoring_records'),
+      c.env.DB.prepare('DELETE FROM care_cycles'),
       c.env.DB.prepare('DELETE FROM sticky_notes'),
       c.env.DB.prepare('DELETE FROM case_records'),
       c.env.DB.prepare('DELETE FROM care_plans'),
       c.env.DB.prepare('DELETE FROM staff'),
       c.env.DB.prepare('DELETE FROM residents'),
     ])
+    const cycleStartDate = new Date(); cycleStartDate.setDate(cycleStartDate.getDate() - 10)
+    const nextReviewDate = new Date(); nextReviewDate.setMonth(nextReviewDate.getMonth() + 6)
     await c.env.DB.batch([
       c.env.DB.prepare(`INSERT INTO residents (id,name,care_level,favorite_things,today_wish,maturation_day,phase) VALUES (1,'岡田 一輝','要介護4','朝のコーヒーと庭の花を眺める時間が好き','天気が良いので、午後は中庭へ出てみたい',10,'fitting')`),
       c.env.DB.prepare(`INSERT INTO staff (id,name,years_experience,position) VALUES (1,'田中 健二',3,'スタッフ')`),
       c.env.DB.prepare(`INSERT INTO staff (id,name,years_experience,position) VALUES (2,'鈴木 美咏',1,'新人')`),
       c.env.DB.prepare(`INSERT INTO staff (id,name,years_experience,position) VALUES (3,'佐藤 太郎',8,'リーダー')`),
     ])
+    await c.env.DB.prepare(`INSERT INTO care_cycles (id,resident_id,start_date,status,trigger_reason,next_review_date,notes) VALUES (1,1,?,?,?,?,?)`)
+      .bind(
+        cycleStartDate.toISOString().split('T')[0],
+        'active', '入所',
+        nextReviewDate.toISOString().split('T')[0],
+        '入所時の初回サイクル。Day10時点で順調に記録・フィット中。'
+      ).run()
     // 24時間シート（15スロット・全列リアルデータ）
     await c.env.DB.batch([
       c.env.DB.prepare(`INSERT INTO care_plans (id,resident_id,time,activity,wishes,can_do,support_needed,medical_notes,remarks,details,status,display_order) VALUES (1,1,'06:30','起床・おむつ交換','急かされずゆっくり起きたい。カーテンを開けて日光を入れてほしい','声かけに応じて目を覚ます。ベッド柵につかまって体を起こそうとする','ベッドの背上げを30度→60度と段階的に行う。夜間パッド確認・交換。端座位介助。上衣の更衣介助（袖通しは自分でできる）。','起立性低血圧の既往あり。端座位で1分ほど安静後に立位へ移行すること。','夜間パッド：コンフォートマキシ使用','ベッド背上げ・端座位・パッド交換','fit',1)`),

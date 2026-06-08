@@ -120,7 +120,7 @@ const App = () => {
   const [loading, setLoading] = useState(true)
   const [resetting, setResetting] = useState(false)
   // ハブが常にホーム。全画面の戻るはハブに戻る。
-  const [currentView, setCurrentView] = useState<'hub' | 'main' | 'sheet' | 'care-plan' | 'conference'>('hub')
+  const [currentView, setCurrentView] = useState<'hub' | 'main' | 'sheet' | 'care-plan' | 'conference' | 'monitoring'>('hub')
 
   const [showInsightForm, setShowInsightForm] = useState(false)
   const [insightContent, setInsightContent] = useState('')
@@ -366,7 +366,38 @@ const App = () => {
   if (currentView === 'conference') return (
     <>
       <PCHeader currentView={currentView} onNavigate={nav} />
-      <ConferencePage onBack={() => setCurrentView('hub')} onComplete={() => setCurrentView('care-plan')} />
+      <ConferencePage
+        onBack={() => setCurrentView('hub')}
+        onComplete={async () => {
+          // サイクルにプラン生成日を記録
+          try { await axios.post(`/api/residents/${residentId}/cycle/plan-generated`) } catch (e) { console.error(e) }
+          setCurrentView('care-plan')
+        }}
+      />
+    </>
+  )
+
+  if (currentView === 'monitoring') return (
+    <>
+      <PCHeader currentView={currentView} onNavigate={nav} />
+      <div className="flex flex-col h-screen bg-slate-50 font-sans">
+        <header className="bg-white border-b border-slate-100 px-4 py-4 flex items-center gap-3 shrink-0 shadow-sm">
+          <button onClick={() => setCurrentView('hub')} className="text-slate-400 hover:text-slate-600 text-sm font-bold flex items-center gap-1.5">
+            <i className="fas fa-arrow-left"></i>
+            <span className="hidden lg:inline">ホーム</span>
+          </button>
+          <div className="w-px h-5 bg-slate-200"></div>
+          <h1 className="font-black text-slate-800 text-base">📊 モニタリング</h1>
+        </header>
+        <div className="flex-1 flex items-center justify-center text-slate-400">
+          <div className="text-center">
+            <i className="fas fa-chart-line text-4xl mb-3 text-slate-200"></i>
+            <p className="text-sm font-bold">モニタリング機能は近日実装予定</p>
+            <p className="text-xs mt-1">目標達成状況の記録・集計ができるようになります</p>
+          </div>
+        </div>
+      </div>
+      <BottomTabBar currentView={currentView} onNavigate={nav} />
     </>
   )
 
