@@ -479,49 +479,76 @@ const App = () => {
       </div>
 
       {/* 中央カラム：ケース記録 */}
-      <div className="flex flex-col bg-gradient-to-b from-white to-slate-50/30" style={mobilePaneStyle(1)}>
-        <div className="p-4 lg:p-8 lg:pb-4 flex flex-col lg:flex-row justify-between items-start lg:items-end shrink-0 gap-3 bg-white/80 backdrop-blur-sm border-b border-slate-100">
-          <div>
-            <h3 className="text-2xl lg:text-3xl font-black text-slate-800 flex items-center gap-3">
-              <i className="fas fa-clipboard-list" style={{ color: primaryColor }}></i>ケース記録
-            </h3>
-            <p className="text-xs lg:text-sm text-slate-500 mt-1">{resident.name}様の1日の記録</p>
+      <div className="flex flex-col bg-white" style={mobilePaneStyle(1)}>
+        {/* モバイル: コンパクトヘッダー / PC: フルヘッダー */}
+        <div className="shrink-0 border-b border-slate-100 bg-white">
+          {/* モバイル */}
+          <div className="lg:hidden flex items-center gap-2 px-3 py-2">
+            <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)}
+              max={new Date().toISOString().split('T')[0]}
+              className="text-xs font-bold text-slate-600 border border-slate-200 rounded-lg px-2 py-1 focus:outline-none flex-1" />
+            <select value={currentStaff?.id || ''} onChange={(e) => setCurrentStaff(staff.find(s => s.id === Number(e.target.value)) || null)}
+              className="text-xs font-bold text-slate-600 border border-slate-200 rounded-lg px-2 py-1 focus:outline-none bg-white">
+              {staff.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
           </div>
-          <div className="flex items-center gap-3 flex-wrap">
-            <div className="flex items-center gap-2 bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
-              <div className="w-8 h-8 rounded-xl bg-[#01C1AF]/10 flex items-center justify-center text-[#01C1AF]"><i className="fas fa-calendar"></i></div>
-              <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} max={new Date().toISOString().split('T')[0]} className="text-xs font-bold text-slate-700 border-none focus:outline-none cursor-pointer pr-2" />
+          {/* PC */}
+          <div className="hidden lg:flex p-8 pb-4 flex-row justify-between items-end gap-3 bg-white/80 backdrop-blur-sm">
+            <div>
+              <h3 className="text-3xl font-black text-slate-800 flex items-center gap-3">
+                <i className="fas fa-clipboard-list" style={{ color: primaryColor }}></i>ケース記録
+              </h3>
+              <p className="text-sm text-slate-500 mt-1">{resident.name}様の1日の記録</p>
             </div>
-            <div className="flex items-center gap-3 bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
-              <div className="w-8 h-8 rounded-xl bg-[#01C1AF]/10 flex items-center justify-center text-[#01C1AF]"><i className="fas fa-user"></i></div>
-              <div className="pr-2">
-                <p className="text-[9px] font-black text-slate-400 leading-none mb-1">担当スタッフ</p>
-                <select value={currentStaff?.id || ''} onChange={(e) => setCurrentStaff(staff.find(s => s.id === Number(e.target.value)) || null)} className="text-xs font-bold text-slate-700 border-none focus:outline-none bg-transparent cursor-pointer">
-                  {staff.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                </select>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
+                <div className="w-8 h-8 rounded-xl bg-[#01C1AF]/10 flex items-center justify-center text-[#01C1AF]"><i className="fas fa-calendar"></i></div>
+                <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} max={new Date().toISOString().split('T')[0]} className="text-xs font-bold text-slate-700 border-none focus:outline-none cursor-pointer pr-2" />
+              </div>
+              <div className="flex items-center gap-3 bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
+                <div className="w-8 h-8 rounded-xl bg-[#01C1AF]/10 flex items-center justify-center text-[#01C1AF]"><i className="fas fa-user"></i></div>
+                <div className="pr-2">
+                  <p className="text-[9px] font-black text-slate-400 leading-none mb-1">担当スタッフ</p>
+                  <select value={currentStaff?.id || ''} onChange={(e) => setCurrentStaff(staff.find(s => s.id === Number(e.target.value)) || null)} className="text-xs font-bold text-slate-700 border-none focus:outline-none bg-transparent cursor-pointer">
+                    {staff.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                  </select>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 lg:p-8 lg:pt-4 space-y-6 lg:space-y-8 min-h-0">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-3 lg:p-8 lg:pt-4 space-y-3 lg:space-y-8 min-h-0">
           {caseRecords.map((record) => (
             <div key={record.id} className="relative group">
-              <div className="flex gap-4 lg:gap-6 items-start">
-                <div className="shrink-0 text-right pt-2">
-                  <p className="text-sm font-black text-slate-800">{record.record_time}</p>
-                  <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mt-1">{record.tag}</p>
+              {/* モバイル: コンパクトカード */}
+              <div className="lg:hidden flex gap-2 items-start">
+                <div className="shrink-0 text-right pt-1 w-10">
+                  <p className="text-xs font-black text-slate-700 tabular-nums">{record.record_time}</p>
                 </div>
-                <div className={'flex-1 bg-white p-4 lg:p-6 rounded-[24px] lg:rounded-[32px] shadow-sm border border-slate-100 transition-all hover:shadow-xl group-hover:border-[#01C1AF]/20 relative overflow-hidden ' + (record.has_alert ? 'border-amber-200 bg-amber-50/10' : '')}>
-                  {record.has_alert ? <div className="absolute top-0 right-0 p-2 bg-amber-400 text-white rounded-bl-xl"><i className="fas fa-exclamation-circle text-sm"></i></div> : null}
-                  <p className="text-sm lg:text-[15px] text-slate-700 leading-relaxed font-medium">{record.content}</p>
-                  <div className="mt-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
-                    <span className="text-[10px] font-bold text-slate-400 tracking-wide">記録者：{record.staff_name}</span>
-                    {record.has_alert && (
-                      <span className="flex items-center gap-1.5 text-amber-600 font-black text-[10px] bg-amber-50 px-3 py-1 rounded-full border border-amber-100">
-                        <i className="fas fa-brain text-xs"></i> 生活リズムに変化のきざし
-                      </span>
-                    )}
+                <div className={'flex-1 bg-white px-3 py-2.5 rounded-2xl border shadow-sm ' + (!!record.has_alert ? 'border-amber-200 bg-amber-50/20' : 'border-slate-100')}>
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500">{record.tag}</span>
+                    {!!record.has_alert && <i className="fas fa-exclamation-circle text-amber-400 text-[10px]"></i>}
+                  </div>
+                  <p className="text-xs text-slate-700 leading-relaxed">{record.content}</p>
+                  <p className="text-[10px] text-slate-300 mt-1.5">{record.staff_name}</p>
+                </div>
+              </div>
+              {/* PC: フルカード */}
+              <div className="hidden lg:block">
+                <div className="flex gap-6 items-start">
+                  <div className="shrink-0 text-right pt-2">
+                    <p className="text-sm font-black text-slate-800">{record.record_time}</p>
+                    <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mt-1">{record.tag}</p>
+                  </div>
+                  <div className={'flex-1 bg-white p-6 rounded-[32px] shadow-sm border border-slate-100 transition-all hover:shadow-xl group-hover:border-[#01C1AF]/20 relative overflow-hidden ' + (!!record.has_alert ? 'border-amber-200 bg-amber-50/10' : '')}>
+                    {!!record.has_alert && <div className="absolute top-0 right-0 p-2 bg-amber-400 text-white rounded-bl-xl"><i className="fas fa-exclamation-circle text-sm"></i></div>}
+                    <p className="text-[15px] text-slate-700 leading-relaxed font-medium">{record.content}</p>
+                    <div className="mt-4 flex items-center justify-between gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
+                      <span className="text-[10px] font-bold text-slate-400 tracking-wide">記録者：{record.staff_name}</span>
+                      {!!record.has_alert && <span className="flex items-center gap-1.5 text-amber-600 font-black text-[10px] bg-amber-50 px-3 py-1 rounded-full border border-amber-100"><i className="fas fa-brain text-xs"></i> 生活リズムに変化のきざし</span>}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -535,16 +562,15 @@ const App = () => {
           )}
         </div>
 
-        <div className="p-4 lg:p-8 lg:pt-0 pb-20 lg:pb-8">
-          <div className="mb-2">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">📌 タグを選んで記録</p>
-            <div className="flex gap-2 flex-wrap">
-            {['食事', '排泤', '起床', '活動', '入浴', '就寝', 'ケア', '巡視', 'その他'].map(tag => (
-              <button key={tag} onClick={() => setRecordTag(tag)} className={`text-[10px] font-bold px-2 py-1 rounded-full transition-all ${recordTag === tag ? 'bg-[#01C1AF] text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
+        <div className="px-3 pt-2 pb-24 lg:p-8 lg:pt-0 lg:pb-8">
+          {/* タグ: モバイルは横スクロール */}
+          <div className="flex gap-1.5 overflow-x-auto scrollbar-hide mb-2 pb-1">
+            {['食事', '排泄', '起床', '活動', '入浴', '就寝', 'ケア', '巡視', 'その他'].map(tag => (
+              <button key={tag} onClick={() => setRecordTag(tag)}
+                className={`text-[10px] font-bold px-2.5 py-1 rounded-full transition-all whitespace-nowrap shrink-0 ${recordTag === tag ? 'bg-[#01C1AF] text-white' : 'bg-slate-100 text-slate-500'}`}>
                 {tag}
               </button>
             ))}
-            </div>
           </div>
           <div className="bg-white rounded-[24px] lg:rounded-[32px] shadow-2xl p-2 flex items-center gap-2 lg:gap-3 border border-slate-100 focus-within:ring-4 focus-within:ring-[#01C1AF]/10 transition-all">
             <button className="w-12 h-12 lg:w-14 lg:h-14 bg-[#01C1AF] text-white rounded-[20px] lg:rounded-[24px] flex items-center justify-center shadow-lg hover:shadow-[#01C1AF]/40 transition-all active:scale-90">
