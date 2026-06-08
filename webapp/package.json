@@ -4,26 +4,30 @@
   "scripts": {
     "dev": "vite",
     "dev:sandbox": "wrangler pages dev dist --d1=care-fit-cycle-db --local --ip 0.0.0.0 --port 3000",
-    "build": "vite build",
+    "build:client": "vite build --config vite.client.config.ts",
+    "build:server": "vite build",
+    "build": "npm run build:client && npm run build:server",
     "preview": "wrangler pages dev dist",
-    "deploy": "npm run build && wrangler pages deploy",
-    "deploy:prod": "npm run build && wrangler pages deploy dist --project-name webapp",
+    "deploy": "npm run build && wrangler pages deploy dist",
+    "deploy:prod": "npm run build && wrangler pages deploy dist --project-name care-fit-cycle",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",
     "db:migrate:local": "wrangler d1 migrations apply care-fit-cycle-db --local",
     "db:migrate:prod": "wrangler d1 migrations apply care-fit-cycle-db",
-    "db:seed": "wrangler d1 execute care-fit-cycle-db --local --file=./seed.sql",
-    "db:reset": "rm -rf .wrangler/state/v3/d1 && npm run db:migrate:local && npm run db:seed",
-    "db:console:local": "wrangler d1 execute care-fit-cycle-db --local",
-    "db:console:prod": "wrangler d1 execute care-fit-cycle-db",
-    "clean-port": "fuser -k 3000/tcp 2>/dev/null || true",
-    "test": "curl http://localhost:3000"
+    "db:seed:local": "wrangler d1 execute care-fit-cycle-db --local --file=./seed.sql",
+    "db:reset": "rm -rf .wrangler/state/v3/d1 && npm run db:migrate:local && npm run db:seed:local"
   },
   "dependencies": {
-    "hono": "^4.11.9"
+    "axios": "^1.7.0",
+    "hono": "^4.11.9",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@hono/vite-build": "^1.2.0",
     "@hono/vite-dev-server": "^0.18.2",
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.1",
     "vite": "^6.3.5",
     "wrangler": "^4.4.0"
   }
